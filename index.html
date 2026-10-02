@@ -1,0 +1,383 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>File Conversion Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow+Condensed:wght@400;600&family=Courier+Prime&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2f2b24;--cream:#e9e1cb;--olive:#6f7a4c;--ochre:#b08f48;--rust:#a35e43}
+*{box-sizing:border-box}
+html{background:#2a1a10}
+body{margin:0;min-height:100vh;padding:22px 14px;font:15px 'Barlow Condensed',sans-serif;color:var(--ink);background-color:#2a1a10;
+ background-image:repeating-linear-gradient(93deg,rgba(0,0,0,.16) 0 2px,transparent 2px 9px,rgba(255,210,160,.04) 9px 11px,transparent 11px 23px),linear-gradient(#3a2416,#22150c)}
+.cab{max-width:1640px;margin:0 auto;padding:16px 24px;border-radius:10px;
+ background:#56392a repeating-linear-gradient(88deg,rgba(0,0,0,.2) 0 1px,transparent 1px 6px,rgba(255,200,150,.06) 6px 8px,transparent 8px 17px);box-shadow:0 18px 40px #000a,inset 0 1px 0 #ffffff1a}
+.plate{border-radius:4px;padding:14px 16px;margin:10px 0;
+ background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 1px,rgba(0,0,0,.03) 1px 2px,transparent 2px 3px),linear-gradient(180deg,#d6d4cd,#b7b4ab);
+ box-shadow:inset 0 1px 0 #f3f1ea,inset 0 -2px 0 #0002,0 2px 5px #0007}
+.eng{font-family:Michroma,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#3b3830;text-shadow:0 1px 0 #fff8}
+header.plate{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+header h1{margin:0;font-size:16px}header .model{font-size:10px;color:#57534a}
+.lbl{font:10px Michroma,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#3b3830;margin:0 0 7px}
+.combos{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+@media(max-width:1100px){.combos{grid-template-columns:repeat(2,1fr)}}
+button,.btn{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;text-align:left;
+ font:600 14px 'Barlow Condensed',sans-serif;letter-spacing:.04em;color:#e6dcc4;background:linear-gradient(#3a3935,#1f1e1b);border:1px solid #000;border-radius:3px;box-shadow:inset 0 1px 0 #ffffff22,0 2px 0 #0006}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:default}
+.combo{flex-direction:column;align-items:stretch;gap:2px}
+.combo .t{display:flex;gap:7px;align-items:center;text-transform:uppercase}
+.combo .t::before{content:'';flex:0 0 9px;height:9px;border-radius:50%;background:var(--c,#555);box-shadow:inset 0 1px 2px #0008}
+.combo.on{outline:2px solid #d9a441;outline-offset:1px}
+.combo small{font-weight:400;color:#b9ae94;font-size:12.5px;letter-spacing:0}
+.main{display:grid;grid-template-columns:1fr 1fr 380px;gap:14px}
+@media(max-width:1300px){.main{grid-template-columns:1fr 1fr}.side{grid-column:1/-1}}
+@media(max-width:800px){.main{grid-template-columns:1fr}}
+.window{position:relative;padding:8px;border-radius:5px;background:#161210;box-shadow:inset 0 2px 7px #000,0 1px 0 #fff}
+.window::after{content:'';position:absolute;inset:8px;pointer-events:none;border-radius:3px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,0) 35%)}
+canvas{display:block;width:100%;border-radius:2px}
+.view canvas.main{cursor:crosshair}
+.cap{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 6px;gap:8px;flex-wrap:wrap}
+.stamp{font:600 14px 'Barlow Condensed';background:#2f2b24;color:#e9e1cb;border-radius:2px;padding:2px 8px}
+.loupe{margin-top:8px}
+.card{font:13.5px/1.55 'Courier Prime',monospace;white-space:pre-wrap;background:var(--cream);border-radius:2px;padding:10px 12px;box-shadow:0 1px 3px #0005,inset 0 0 26px #c4b48a55}
+.card h3{font:600 17px 'Barlow Condensed';margin:0 0 4px;letter-spacing:.03em;white-space:normal}
+.tag{display:inline-block;font:600 12px Michroma;letter-spacing:.12em;padding:3px 8px;border-radius:2px;color:#fff3e0;margin-bottom:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.note{font-size:13px;color:#4d483d;margin-top:6px}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:1100px){.bottom{grid-template-columns:1fr}}
+table{width:100%;border-collapse:collapse;font:13.5px/1.4 'Courier Prime',monospace}
+th{font:10px Michroma;letter-spacing:.14em;text-align:left;padding:6px;border-bottom:2px solid #8d8064;color:#4b4434}
+td{padding:6px;border-bottom:1px solid #c9bc98;vertical-align:top}
+td b{font-family:'Barlow Condensed';font-size:15px}
+.ladder td:first-child{white-space:nowrap}
+
+.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px}
+@media(max-width:1300px){.tri{grid-template-columns:1fr}}
+.pnl{padding:8px;border-radius:4px;border:2px solid transparent}
+.pnl.hot{border-color:#d9a441;background:rgba(217,164,65,.08)}
+.ctlrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:14px}
+.ctlrow select{width:auto;flex:1}
+.formula{white-space:pre-wrap}
+footer{font-size:12px;color:#cdbfa3;text-align:center;opacity:.85;padding:4px;line-height:1.6}
+footer a{color:#e3d2a8}
+</style></head><body>
+<div class="cab">
+<header class="plate"><h1 class="eng">File Conversion Lab</h1><span class="model eng">Model FC-24 · Audio conversions shown as photo conversions</span></header>
+
+<section class="plate"><div class="lbl">Pick a conversion · the photo shows what the same kind of conversion does to a picture</div><div class="combos" id="combos"></div></section>
+
+<section class="plate main">
+ <div class="view"><div class="cap"><span class="lbl" style="margin:0">Original master</span><span class="stamp" id="stA"></span></div>
+  <div class="window"><canvas class="main" id="cA" width="960" height="600"></canvas></div>
+  <div class="window loupe"><canvas id="lA" width="480" height="240"></canvas></div></div>
+ <div class="view"><div class="cap"><span class="lbl" style="margin:0" id="capB">Converted</span><span class="stamp" id="stB"></span></div>
+  <div class="window"><canvas class="main" id="cB" width="960" height="600"></canvas></div>
+  <div class="window loupe"><canvas id="lB" width="480" height="240"></canvas></div></div>
+ <div class="side">
+  <div class="card" id="info"></div>
+  <div class="row">
+   <button id="pA">▶ Hear original</button><button id="pB">▶ Hear converted</button>
+  </div>
+  <div class="note" id="audnote"></div>
+  <div class="row">
+   <label class="btn">Load your photo<input type="file" id="fImg" accept="image/*" hidden></label>
+   <label class="btn">Load an audio clip<input type="file" id="fAud" accept="audio/*" hidden></label>
+  </div>
+  <div class="note">Click either photo to move the magnifier. Your own photo shows lossy artifacts even better than the built-in scene.</div>
+ </div>
+</section>
+
+<section class="plate">
+ <div class="lbl">Three different things people mix up · each one on its own</div>
+ <div class="card formula" id="formula"></div>
+ <div class="tri">
+  <div class="pnl" id="P1"><div class="lbl">① Sample rate · how OFTEN the wave is measured</div>
+   <div class="ctlrow"><span>Sample rate</span><select id="srSel"></select><span>Tone</span><select id="toneSel"></select></div>
+   <div class="window"><canvas id="pSR" width="760" height="300"></canvas></div><div class="note" id="nSR"></div></div>
+  <div class="pnl" id="P2"><div class="lbl">② Bit depth · how PRECISELY each measurement is stored</div>
+   <div class="ctlrow"><span>Bit depth</span><select id="bdSel"></select><span>Level</span><select id="lvSel"></select></div>
+   <div class="window"><canvas id="pBD" width="760" height="300"></canvas></div><div class="note" id="nBD"></div></div>
+  <div class="pnl" id="P3"><div class="lbl">③ Bitrate · how much DATA per second a lossy file may use</div>
+   <div class="ctlrow"><span>Format</span><select id="brSel"></select></div>
+   <div class="window"><canvas id="pBR" width="760" height="300"></canvas></div><div class="note" id="nBR"></div></div>
+ </div>
+</section>
+<section class="plate">
+ <div class="lbl">File size · megabytes per minute of stereo audio</div>
+ <div class="window"><canvas id="bars" width="1560" height="300"></canvas></div>
+</section>
+
+<section class="plate bottom">
+ <div class="card" id="worst"></div>
+ <div class="card" id="best"></div>
+</section>
+
+<section class="plate"><div class="lbl">Key guide · what to deliver</div><div class="card" style="white-space:normal">
+<table><tr><th>Destination</th><th>Upload this</th><th>What listeners get</th></tr>
+<tr><td><b>Spotify (music, via your distributor)</b></td><td>FLAC preferred, WAV accepted · 44.1 kHz or higher · 24-bit if that's your native master (16-bit only if no higher master exists) · stereo. Spotify asks you <i>not</i> to downsample or reduce bit depth yourself.</td><td>Ogg Vorbis ≈ 24 / 96 / 160 / 320 kbps (Low → Very high) · Lossless up to 24-bit/44.1 kHz FLAC on Premium</td></tr>
+<tr><td><b>Apple Music</b></td><td>24-bit master at the highest <i>native</i> sample rate (Apple Digital Masters). No upsampling, no padding 16-bit up to 24.</td><td>AAC, plus lossless/hi-res lossless</td></tr>
+<tr><td><b>Apple Podcasts</b></td><td>WAV/FLAC 44.1–192 kHz, 24-bit recommended, stereo — or MP3 at 44.1/48 kHz: stereo 128–256 kbps, mono 96–128 kbps · loudness ≈ −16 LKFS ±1, true peak ≤ −1 dBFS</td><td>Apple's own encode</td></tr>
+<tr><td><b>Spotify podcasts (Spotify for Creators)</b></td><td>MP3, M4A or WAV, mono or stereo. No bitrate is specified — use 44.1/48 kHz, and MP3 at 128 kbps+ (or WAV) is a safe choice.</td><td>Spotify's own encode</td></tr>
+<tr><td><b>YouTube</b></td><td>Audio in the video: AAC-LC or Opus, 48 kHz, 384 kbps stereo (128 kbps mono)</td><td>YouTube's own encode</td></tr>
+<tr><td><b>Your archive</b></td><td>WAV or FLAC, 24-bit, at the rate you recorded (48 kHz for podcast/video). Every other file is made <i>from this</i>.</td><td>—</td></tr></table>
+<div class="lbl" style="margin-top:14px">MP3 bitrate ladder (stereo) · general guidance</div>
+<table class="ladder"><tr><th>Bitrate</th><th>MB / min</th><th>Good for</th></tr>
+<tr><td><b>320 kbps</b></td><td>2.4</td><td>Highest MP3 setting · music listening copies, sharing a mix</td></tr>
+<tr><td><b>256 kbps</b></td><td>1.9</td><td>Music; top of Apple's podcast range</td></tr>
+<tr><td><b>192 kbps</b></td><td>1.4</td><td>Music where size matters; very good podcasts</td></tr>
+<tr><td><b>128 kbps</b></td><td>0.96</td><td>Podcasts and speech (stereo). Music artifacts can be audible on good speakers</td></tr>
+<tr><td><b>96 kbps</b></td><td>0.72</td><td>Mono speech podcasts (Apple's mono recommendation: 96–128)</td></tr>
+<tr><td><b>64 kbps and below</b></td><td>≤ 0.48</td><td>Mono speech only, in a pinch · music sounds watery and dull</td></tr></table>
+</div></section>
+<footer>Sources: <a href="https://support.spotify.com/us/artists/article/audio-file-formats/">Spotify audio file formats</a> · <a href="https://support.spotify.com/us/article/audio-quality/">Spotify audio quality</a> · <a href="https://www.apple.com/apple-music/apple-digital-masters/docs/apple-digital-masters.pdf">Apple Digital Masters</a> · <a href="https://podcasters.apple.com/support/893-audio-requirements">Apple Podcasts audio requirements</a> · <a href="https://support.spotify.com/us/creators/article/publishing-audio-episodes/">Spotify for Creators</a> · <a href="https://support.google.com/youtube/answer/1722171">YouTube upload encoding</a><br>
+Photo effects are real conversions done in your browser (JPEG compression, resampling, colour reduction). They are an analogy for the audio — the ear and eye lose different things, but the principles match.</footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const W=960,H=600;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+const mk=(w=W,h=H)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
+const toBlob=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
+async function blobCanvas(b){const bm=await createImageBitmap(b),c=mk(bm.width,bm.height);c.getContext('2d').drawImage(bm,0,0);return c;}
+const fmtB=b=>b>1048576?(b/1048576).toFixed(2)+' MB':(b/1024).toFixed(0)+' KB';
+
+// ---------- built-in scene (original artwork, lots of fine detail + smooth gradients) ----------
+function scene(){const c=mk(),g=c.getContext('2d'),r=rng(11);
+ let sk=g.createLinearGradient(0,0,0,H*.62);sk.addColorStop(0,'#5f7f95');sk.addColorStop(.55,'#d9a467');sk.addColorStop(1,'#e8c78f');g.fillStyle=sk;g.fillRect(0,0,W,H);
+ const sun=g.createRadialGradient(640,250,10,640,250,170);sun.addColorStop(0,'#fff3d2');sun.addColorStop(.2,'#f6d79c');sun.addColorStop(1,'rgba(246,215,156,0)');g.fillStyle=sun;g.fillRect(0,0,W,H);
+ const ridge=(base,amp,col,seed)=>{const rr=rng(seed);g.fillStyle=col;g.beginPath();g.moveTo(0,H);let y=base;for(let x=0;x<=W;x+=4){y+=(rr()-.5)*amp;y=base+(y-base)*.96;g.lineTo(x,y+Math.sin(x/90+seed)*amp*1.5);}g.lineTo(W,H);g.closePath();g.fill();};
+ ridge(330,9,'#8d8a83',3);ridge(360,11,'#6c6a5f',5);ridge(395,13,'#4f5146',8);
+ let lk=g.createLinearGradient(0,400,0,H);lk.addColorStop(0,'#c99b62');lk.addColorStop(1,'#3e5560');g.fillStyle=lk;g.fillRect(0,405,W,H-405);
+ for(let y=410;y<H;y+=3){g.strokeStyle=`rgba(255,240,210,${0.05+0.12*r()})`;g.beginPath();g.moveTo(r()*W*.3,y);g.lineTo(W*.7+r()*W*.3,y);g.stroke();}
+ // starburst (fine detail)
+ g.save();g.translate(170,170);g.fillStyle='#f3ead4';g.beginPath();g.arc(0,0,120,0,7);g.fill();g.strokeStyle='#2f2b24';g.lineWidth=1;
+ for(let a=0;a<360;a+=3){const t=a*Math.PI/180;g.beginPath();g.moveTo(0,0);g.lineTo(118*Math.cos(t),118*Math.sin(t));g.stroke();}g.restore();
+ // spectrum + grey ramp (smooth gradients -> banding)
+ const hue=g.createLinearGradient(330,0,930,0);['#c0392b','#c9a227','#6f9a3c','#2f7f8a','#3b4f9a','#8a3b8a','#c0392b'].forEach((cc,i)=>hue.addColorStop(i/6,cc));
+ g.fillStyle=hue;g.fillRect(330,40,600,46);const gr=g.createLinearGradient(330,0,930,0);gr.addColorStop(0,'#111');gr.addColorStop(1,'#f5f5f5');g.fillStyle=gr;g.fillRect(330,92,600,26);
+ // fine text
+ g.fillStyle='#2f2b24';g.font='bold 64px Georgia,serif';g.fillText('HI-FI 1976',330,190);
+ g.font='13px Georgia,serif';['High-frequency detail lives in edges, textures and tiny type.','Lose it in conversion and no "upscale" can invent it back.','The quick brown fox jumps over the lazy dog · 0123456789'].forEach((t,i)=>g.fillText(t,332,222+i*18));
+ // checkerboard & stripes
+ for(let y=0;y<8;y++)for(let x=0;x<16;x++){g.fillStyle=(x+y)%2?'#2f2b24':'#efe6cf';g.fillRect(40+x*8,330+y*8,8,8);}
+ for(let i=0;i<40;i++){g.fillStyle=i%2?'#2f2b24':'#efe6cf';g.fillRect(40+i*3,410,3,60);}
+ // film grain
+ const im=g.getImageData(0,0,W,H),d=im.data;for(let i=0;i<d.length;i+=4){const n=(r()-.5)*14;d[i]+=n;d[i+1]+=n;d[i+2]+=n;}g.putImageData(im,0,0);
+ return c;}
+let SRC=scene();
+
+// ---------- image conversions ----------
+async function jpeg(src,q){const b=await toBlob(src,'image/jpeg',q);return {c:await blobCanvas(b),bytes:b.size};}
+async function png(c){return (await toBlob(c,'image/png')).size;}
+function pixelate(src,f){const s=mk(Math.round(W/f),Math.round(H/f)),sg=s.getContext('2d');sg.imageSmoothingQuality='high';sg.drawImage(src,0,0,s.width,s.height);
+ const o=mk(),og=o.getContext('2d');og.imageSmoothingEnabled=false;og.drawImage(s,0,0,W,H);return {c:o,small:s};}
+function upscaleSmooth(small){const o=mk(),og=o.getContext('2d');og.imageSmoothingEnabled=true;og.imageSmoothingQuality='high';og.drawImage(small,0,0,W,H);return o;}
+function quantize(src,levels,dither){const o=mk(),g=o.getContext('2d');g.drawImage(src,0,0);const im=g.getImageData(0,0,W,H),d=im.data,r=rng(5),st=255/(levels-1);
+ for(let i=0;i<d.length;i+=4)for(let k=0;k<3;k++){let v=d[i+k]+(dither?(r()-r())*st:0);d[i+k]=Math.round(v/st)*st;}g.putImageData(im,0,0);return o;}
+function stretch(src,f){const o=mk(),g=o.getContext('2d');g.drawImage(src,-(W*f-W)/2,0,W*f,H);return o;}
+async function generations(src,n,q){let c=src,bytes=0;for(let i=0;i<n;i++){const s=mk(),g=s.getContext('2d');const sc=i%2?1.02:0.98;g.imageSmoothingQuality='high';
+ g.drawImage(c,(W-W*sc)/2+(i%3-1),(H-H*sc)/2,W*sc,H*sc);const j=await jpeg(s,q);c=j.c;bytes=j.bytes;}return {c,bytes};}
+
+// ---------- the conversions ----------
+const MB=(sr,bits)=>sr*bits*2*60/8/1e6;
+const C=[
+ {k:'flac',v:'ok',t:'WAV → FLAC',s:'lossless, ~half the size',audio:'WAV 24-bit/48 kHz → FLAC 24-bit/48 kHz',img:'Uncompressed photo → PNG (lossless)',mb:MB(48000,24)*0.6,mbl:'≈ 9–12 (≈ 50–70% of WAV)',
+  run:async s=>{const c=mk();c.getContext('2d').drawImage(s,0,0);return {c,bytes:await png(c)};},au:{type:'orig'},
+  txt:'Bit-for-bit identical when decoded. FLAC is a zip file for audio: smaller, nothing thrown away. Spotify\'s preferred upload format.',use:'Correct for archiving, distribution uploads, sending masters.'},
+ {k:'cd',v:'ok',t:'24/48 → 16/44.1',s:'with dither',audio:'WAV 24-bit/48 kHz → WAV 16-bit/44.1 kHz with dither',img:'24-bit colour → 16-bit colour, dithered (uncompressed)',mb:MB(44100,16),mbl:MB(44100,16).toFixed(1),
+  run:async s=>{const c=quantize(s,32,true);return {c,bytes:W*H*2};},au:{type:'sr',sr:44100,bits:16,dither:true},
+  txt:'A small, careful reduction. Dither adds a whisper of noise so the reduction doesn\'t create harsh steps — like the fine grain that hides colour banding here. Practically indistinguishable.',use:'Correct when a destination requires CD spec. But for Spotify, deliver your native 24-bit master and let them convert.'},
+ {k:'320',v:'ok',t:'WAV → MP3 320',s:'lossy, small, near-transparent',audio:'WAV → MP3 320 kbps',img:'Photo → JPEG, high quality (92%)',mb:2.4,mbl:'2.4',
+  run:async s=>jpeg(s,0.92),au:null,
+  txt:'Lossy: the encoder throws away what it predicts you won\'t notice. At 320 kbps most people can\'t tell the difference — look closely at the magnifier: almost nothing has changed, yet the file is a fraction of the size.',use:'Correct for listening copies and sharing. Never as the file you edit or master from.'},
+ {k:'128',v:'warn',t:'WAV → MP3 128',s:'fine for speech',audio:'WAV → MP3 128 kbps',img:'Photo → JPEG, medium quality (50%)',mb:0.96,mbl:'0.96',
+  run:async s=>jpeg(s,0.5),au:null,
+  txt:'Smaller again. Speech holds up well; music starts to lose sparkle and you may hear "swirly" cymbals. In the magnifier: soft edges and faint blocks around fine lines and type.',use:'Good for podcasts (Apple recommends 128–256 kbps stereo). A compromise for music.'},
+ {k:'48',v:'bad',t:'WAV → MP3 48',s:'starved bitrate',audio:'WAV → MP3 48 kbps',img:'Photo → JPEG, very low quality (6%)',mb:0.36,mbl:'0.36',
+  run:async s=>jpeg(s,0.06),au:null,
+  txt:'Too few bits for the job. The encoder has to throw away almost everything: watery, metallic sound, smeared transients, dull top end. The photo goes blocky and the colours smear.',use:'Bad for anything except emergency mono speech.'},
+ {k:'sr',v:'bad',t:'48 kHz → 11 kHz',s:'sample rate cut',audio:'WAV 48 kHz → WAV 11.025 kHz',img:'Photo → 1/8 resolution (pixelated)',mb:MB(11025,16),mbl:MB(11025,16).toFixed(2),
+  run:async s=>{const p=pixelate(s,8);return {c:p.c,bytes:p.small.width*p.small.height*3,small:p.small};},au:{type:'sr',sr:11025,bits:16},
+  txt:'Sample rate is audio\'s resolution. 11 kHz can only hold frequencies up to ~5.5 kHz, so cymbals, "s" sounds and air vanish — exactly like fine detail disappearing into big pixels. Listen: it sounds like a phone call.',use:'Bad for any finished audio.'},
+ {k:'bits',v:'bad',t:'24-bit → 8-bit',s:'no dither',audio:'WAV 24-bit → WAV 8-bit (no dither)',img:'Full colour → 4 levels per colour',mb:MB(48000,8),mbl:MB(48000,8).toFixed(2),
+  run:async s=>{const c=quantize(s,4,false);return {c,bytes:W*H};},au:{type:'bits',bits:8},
+  txt:'Bit depth is how finely each sample\'s level is measured — like how many shades of colour you have. Too few and smooth gradients turn into steps (banding). In audio that\'s hiss and gritty distortion, worst on quiet passages and fades.',use:'Bad. Keep 24-bit while working; 16-bit with dither only when required.'},
+ {k:'up',v:'bad',t:'Low-res → "hi-res"',s:'upconverted back',audio:'11 kHz / low-bitrate file → WAV 24-bit/96 kHz',img:'Pixelated photo → enlarged and saved at 2× resolution',mb:MB(96000,24),mbl:MB(96000,24).toFixed(1),
+  run:async s=>{const p=pixelate(s,8);const c=upscaleSmooth(p.small);return {c,bytes:W*H*3*4};},au:{type:'sr',sr:11025,bits:16},
+  txt:'Converting a damaged file "up" makes it BIGGER, not better. The pixels get smoothed into blur; the audio gets a 96 kHz label with nothing above 5.5 kHz inside. As Apple puts it, upsampling won\'t recover or add information.',use:'Bad — and sneaky, because the file looks like a hi-res master.'},
+ {k:'gen',v:'bad',t:'MP3 → WAV → MP3 ×8',s:'generation loss',audio:'WAV → MP3 128 → WAV → MP3 128 … ×8 (plus the platform\'s own encode)',img:'JPEG re-saved 8 times (with small edits between)',mb:0.96,mbl:'0.96 (same size, worse each time)',
+  run:async s=>generations(s,8,0.55),au:null,
+  txt:'Every lossy encode throws away a little more, and the damage stacks. This is what happens when a lossy file is converted to WAV and uploaded: the platform encodes it AGAIN. Converting MP3 to WAV doesn\'t undo anything — it just wraps the damage in a bigger file.',use:'Bad. Always encode directly from the lossless master.'},
+ {k:'rate',v:'bad',t:'44.1 played as 48',s:'sample-rate mismatch',audio:'44.1 kHz audio flagged/played as 48 kHz',img:'Photo stretched 8.8% wider',mb:MB(44100,16),mbl:MB(44100,16).toFixed(1)+' (unchanged)',
+  run:async s=>{const c=stretch(s,48000/44100);return {c,bytes:W*H*3};},au:{type:'rate',rate:48000/44100},
+  txt:'Nothing is lost — it\'s just interpreted wrong. If a converter or edit session treats 44.1 kHz audio as 48 kHz, it plays 8.8% fast and about 1.5 semitones sharp, and drifts out of sync with video — like a stretched photo.',use:'Bad. Match the project/session sample rate, or let the software resample properly.'}];
+const VC={ok:'#8f9e5c',warn:'#cfa64e',bad:'#c4644a'},VT={ok:'GOOD CONVERSION',warn:'COMPROMISE',bad:'BAD CONVERSION'};
+
+// ---------- UI ----------
+let cur=3,OUT=null,focus={x:170,y:150},srcBytes=0;
+function combos(){$('combos').innerHTML=C.map((c,i)=>`<button class="combo${i===cur?' on':''}" style="--c:${VC[c.v]}" onclick="pick(${i})"><span class="t">${i+1}. ${c.t}</span><small>${c.s}</small></button>`).join('');}
+async function pick(i){cur=i;combos();const c=C[i];setPanels(c.k);drawBD();drawBR();$('capB').textContent='Converted · '+c.img;
+ $('info').innerHTML=`<span class="tag" style="background:${VC[c.v]}">${VT[c.v]}</span><h3>${c.audio}</h3><b>Photo equivalent:</b> ${c.img}\n<b>Size:</b> ${c.mbl} MB per minute (stereo)\n\n${c.txt}\n\n<b>Verdict:</b> ${c.use}`;
+ $('stB').textContent='working…';OUT=await c.run(SRC);$('stB').textContent=fmtB(OUT.bytes)+' · '+(100*OUT.bytes/srcBytes).toFixed(0)+'% of original';
+ $('cB').getContext('2d').drawImage(OUT.c,0,0,W,H);loupes();bars();
+ $('pB').disabled=!c.au;$('audnote').textContent=c.au?(c.au.type==='orig'?'Lossless: the converted file plays back identical to the original.':'Converted audio is processed live in your browser.'):'MP3-style lossy artifacts can\'t be faithfully reproduced in a browser — the photo shows the effect. Try it yourself: export one track at 320, 128 and 48 kbps and compare.';
+ if(AU.playing)stop();}
+function loupes(){const cw=160,ch=80,x=Math.max(0,Math.min(W-cw,focus.x-cw/2)),y=Math.max(0,Math.min(H-ch,focus.y-ch/2));
+ [['lA',SRC],['lB',OUT&&OUT.c]].forEach(([id,src])=>{const c=$(id),g=c.getContext('2d');g.imageSmoothingEnabled=false;g.fillStyle='#000';g.fillRect(0,0,c.width,c.height);if(src)g.drawImage(src,x*src.width/W,y*src.height/H,cw*src.width/W,ch*src.height/H,0,0,c.width,c.height);
+  g.fillStyle='#e9e1cbcc';g.fillRect(6,6,104,18);g.fillStyle='#2f2b24';g.font='600 13px Barlow Condensed';g.fillText('MAGNIFIER · 3×',12,20);});
+ [['cA',SRC],['cB',OUT&&OUT.c]].forEach(([id,src])=>{const g=$(id).getContext('2d');if(src)g.drawImage(src,0,0,W,H);g.strokeStyle='#e9a441';g.lineWidth=3;g.strokeRect(x,y,cw,ch);});}
+['cA','cB'].forEach(id=>$(id).addEventListener('click',e=>{const r=e.target.getBoundingClientRect();focus={x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};loupes();}));
+function bars(){const c=$('bars'),g=c.getContext('2d'),Wd=c.width,Hd=c.height;const bg=g.createRadialGradient(Wd/2,Hd/2,0,Wd/2,Hd/2,Wd*.6);bg.addColorStop(0,'#f2e9cf');bg.addColorStop(1,'#cdb98d');g.fillStyle=bg;g.fillRect(0,0,Wd,Hd);
+ const rows=[{t:'MASTER · WAV 24-bit/48 kHz',mb:MB(48000,24),v:'ok'},...C.map((x,i)=>({t:`${i+1}. ${x.t}`,mb:x.mb,v:x.v,i}))];
+ const l=260,r=Wd-120,max=36,rh=(Hd-20)/rows.length;
+ rows.forEach((o,j)=>{const y=10+j*rh,w=(r-l)*Math.min(o.mb,max)/max;g.fillStyle=o.i===cur?'#2f2b24':'#4a453c';g.font=(o.i===cur?'600 ':'')+'14px Barlow Condensed';g.textAlign='right';g.fillText(o.t,l-10,y+rh*.68);
+  g.fillStyle=VC[o.v]+(o.i===cur||o.i==null?'':'99');g.fillRect(l,y+3,Math.max(2,w),rh-6);if(o.i===cur){g.strokeStyle='#2f2b24';g.lineWidth=2;g.strokeRect(l,y+3,Math.max(2,w),rh-6);}
+  g.textAlign='left';g.fillStyle='#2f2b24';g.fillText(o.mb.toFixed(o.mb<1?2:1)+' MB',l+w+8,y+rh*.68);});
+ g.strokeStyle='rgba(60,50,35,.35)';g.beginPath();g.moveTo(l,4);g.lineTo(l,Hd-6);g.stroke();}
+
+// ---------- audio ----------
+const AU={ctx:null,src:null,buf:null,playing:null,cache:{}};
+function synthMusic(sr){const dur=6,n=sr*dur,L=new Float32Array(n),r=rng(3),bpm=100,beat=60/bpm;
+ const chords=[[220,277.2,329.6],[196,246.9,293.7],[174.6,220,261.6],[196,246.9,329.6]];
+ for(let i=0;i<n;i++){const t=i/sr,b=Math.floor(t/beat),tb=t-b*beat,ch=chords[Math.floor(b/4)%4];
+  let x=0;ch.forEach((f,k)=>{for(let h=1;h<=7;h++)x+=0.05/h*Math.sin(2*Math.PI*f*h*t+k);});
+  if(b%2===0){x+=0.6*Math.sin(2*Math.PI*(50+90*Math.exp(-tb*30))*tb)*Math.exp(-tb*8);}
+  const e8=t%(beat/2);x+=(r()*2-1)*0.18*Math.exp(-e8*40);           // hi-hat (bright noise)
+  const mel=[880,987.8,1174.7,1318.5][Math.floor(t/(beat))%4];x+=0.12*Math.sin(2*Math.PI*mel*t)*Math.exp(-tb*3)+0.05*Math.sin(2*Math.PI*mel*3*t)*Math.exp(-tb*6);
+  L[i]=x*0.5;}
+ // simple high-pass for the hat noise feel
+ let p=0;for(let i=0;i<n;i++){const y=L[i];L[i]=y-0.0*p;p=y;}
+ return L;}
+async function ensureCtx(){if(!AU.ctx){AU.ctx=new (window.AudioContext||window.webkitAudioContext)();}await AU.ctx.resume();
+ if(!AU.buf){const sr=AU.ctx.sampleRate,b=AU.ctx.createBuffer(1,sr*6,sr);b.copyToChannel(synthMusic(sr),0);AU.buf=b;}}
+async function process(au){const key=JSON.stringify(au);if(AU.cache[key])return AU.cache[key];const src=AU.buf;let out=src;
+ if(au.type==='sr'){const off1=new OfflineAudioContext(src.numberOfChannels,src.length,src.sampleRate),s1=off1.createBufferSource();s1.buffer=src;
+  let n=s1;for(let i=0;i<4;i++){const f=off1.createBiquadFilter();f.type='lowpass';f.frequency.value=au.sr*0.45;f.Q.value=0.707;n.connect(f);n=f;}n.connect(off1.destination);s1.start();const lp=await off1.startRendering();
+  const off2=new OfflineAudioContext(src.numberOfChannels,Math.ceil(src.length*au.sr/src.sampleRate),au.sr),s2=off2.createBufferSource();s2.buffer=lp;s2.connect(off2.destination);s2.start();out=await off2.startRendering();
+  if(au.bits)out=quant(out,au.bits,au.dither);}
+ else if(au.type==='bits')out=quant(src,au.bits,false);
+ AU.cache[key]=out;return out;}
+function quant(b,bits,dither){const o=new AudioBuffer({length:b.length,numberOfChannels:b.numberOfChannels,sampleRate:b.sampleRate}),q=Math.pow(2,bits-1);
+ for(let c=0;c<b.numberOfChannels;c++){const s=b.getChannelData(c),d=o.getChannelData(c);for(let i=0;i<s.length;i++){const dt=dither?(Math.random()-Math.random()):0;d[i]=Math.round(s[i]*q+dt)/q;}}return o;}
+function stop(){if(AU.src){try{AU.src.stop();}catch(e){}}AU.src=null;AU.playing=null;$('pA').textContent='▶ Hear original';$('pB').textContent='▶ Hear converted';}
+async function play(which){await ensureCtx();if(AU.playing===which){stop();return;}stop();
+ const au=which==='B'?C[cur].au:{type:'orig'};if(!au)return;const buf=(au.type==='orig'||au.type==='rate')?AU.buf:await process(au);
+ const s=AU.ctx.createBufferSource();s.buffer=buf;s.loop=true;if(au.type==='rate')s.playbackRate.value=au.rate;
+ const g=AU.ctx.createGain();g.gain.value=0.6;s.connect(g);g.connect(AU.ctx.destination);s.start();AU.src=s;AU.playing=which;
+ $(which==='A'?'pA':'pB').textContent='■ Stop';}
+$('pA').onclick=()=>play('A');$('pB').onclick=()=>play('B');
+$('fAud').onchange=async e=>{const f=e.target.files[0];if(!f)return;await ensureCtx();try{const ab=await AU.ctx.decodeAudioData(await f.arrayBuffer());
+ const n=Math.min(ab.length,ab.sampleRate*30),b=AU.ctx.createBuffer(ab.numberOfChannels,n,ab.sampleRate);for(let c=0;c<ab.numberOfChannels;c++)b.copyToChannel(ab.getChannelData(c).subarray(0,n),c);
+ AU.buf=b;AU.cache={};stop();$('audnote').textContent='Using your clip: '+f.name;}catch(err){$('audnote').textContent='Could not read that audio file.';}};
+$('fImg').onchange=async e=>{const f=e.target.files[0];if(!f)return;const bm=await createImageBitmap(f),c=mk(),g=c.getContext('2d');
+ const s=Math.max(W/bm.width,H/bm.height);g.drawImage(bm,(W-bm.width*s)/2,(H-bm.height*s)/2,bm.width*s,bm.height*s);SRC=c;await init();};
+
+// ---------- text cards ----------
+$('worst').innerHTML=`<h3>Worst case: right format, wrong insides</h3>A WAV file passes every "correct format" check — but the format is just the box. What's inside decides the quality.
+
+<b>1. The hidden MP3.</b> An MP3 converted to WAV and uploaded. It looks like a lossless master, but it carries all the MP3 damage, and the platform then encodes it again (conversion 9). This is the real worst case.
+
+<b>2. Too low a sample rate or bit depth.</b> Spotify asks for 44.1 kHz or higher. Below 44.1 kHz or 16-bit, Spotify upconverts it to 44.1 kHz/16-bit and it won't qualify for lossless playback — and the missing detail stays missing (conversion 8).
+
+<b>3. Higher than needed.</b> 24-bit/96 kHz is fine. Spotify converts it down itself (to max 24-bit/44.1 kHz FLAC) and asks you not to convert it yourself.
+
+<b>4. Wrong sample rate in the session.</b> Audio at the wrong rate in an edit or a bad conversion plays fast or slow and drifts out of sync (conversion 10).
+
+<b>5. Low-bitrate MP3 to a podcast host.</b> Accepted, but you start at a low quality and the platform re-encodes it for streaming.`;
+$('best').innerHTML=`<h3>Best conversion scenario: small files that still sound great</h3><b>Rule 1.</b> Keep one lossless master (WAV or FLAC, 24-bit, the rate you recorded at). Never edit or master from a lossy file.
+
+<b>Rule 2.</b> Make every smaller file DIRECTLY from that master, once. Never MP3 → WAV → MP3.
+
+<b>Rule 3.</b> Want smaller without losing anything? Use FLAC: roughly half the size of WAV, identical sound (conversion 1).
+
+<b>Rule 4.</b> Need much smaller? Pick the right lossy bitrate for the content: speech podcast ≈ 96–128 kbps mono or 128 kbps stereo; music listening copy 256–320 kbps (conversions 3–4).
+
+<b>Rule 5.</b> Uploading music to a streaming service? Upload lossless and let the platform make its own lossy versions. Spotify streams Ogg Vorbis up to ≈ 320 kbps, plus lossless up to 24-bit/44.1 kHz FLAC on Premium.
+
+<b>Rule 6.</b> Never "upgrade" a damaged file. Upsampling or padding bits makes it bigger, not better (conversion 8).`;
+
+// ---------- three concept panels ----------
+const kHz=v=>parseFloat((v/1000).toFixed(2));
+const SRS=[[8000,'8 kHz'],[11025,'11.025 kHz'],[22050,'22.05 kHz'],[44100,'44.1 kHz'],[48000,'48 kHz'],[96000,'96 kHz'],['up','96 kHz — upconverted from 11.025 kHz']];
+const TONES=[[1000,'1 kHz · body of a voice'],[4000,'4 kHz · presence'],[8000,'8 kHz · "s" sounds, cymbals'],[15000,'15 kHz · air, sparkle']];
+const BDS=[4,8,12,16,24],LVS=[[-1,'Loud (−1 dBFS)'],[-40,'Quiet (−40 dBFS)'],[-60,'Very quiet (−60 dBFS)']];
+const BRS=[['lossless','WAV / FLAC · lossless (2,304 kbps for 24-bit/48 kHz stereo)',2304],['320','MP3 320 kbps',320],['256','MP3 256 kbps',256],['128','MP3 128 kbps',128],['64','MP3 64 kbps',64],['48','MP3 48 kbps',48],['gen','MP3 128 kbps, re-encoded 8 times',128]];
+// illustrative encoder behaviour (real encoders vary): cutoff Hz, masking threshold dB, coarseness dB
+const ENC={lossless:[22000,-200,0,0],'320':[20000,-80,1,0],'256':[19000,-75,1.5,0],'128':[16000,-62,3,0],'64':[11000,-54,6,0],'48':[9500,-48,8,0],gen:[15000,-55,5,4]};
+const fill=(id,arr)=>{$(id).innerHTML=arr.map(([v,t])=>`<option value="${v}">${t}</option>`).join('');};
+fill('srSel',SRS);fill('toneSel',TONES);fill('bdSel',BDS.map(b=>[b,b+'-bit']));fill('lvSel',LVS);fill('brSel',BRS.map(x=>[x[0],x[1]]));
+$('srSel').value='48000';$('toneSel').value='8000';$('bdSel').value='24';$('lvSel').value='-1';$('brSel').value='lossless';
+$('formula').innerHTML=`<b>How they fit together</b> — uncompressed (WAV) data rate = <b>sample rate × bit depth × channels</b>
+  48,000 × 24 × 2 = 2,304 kbps  ≈ 17.3 MB per minute   (24-bit / 48 kHz master)
+  44,100 × 16 × 2 = 1,411 kbps  ≈ 10.6 MB per minute   (CD quality)
+A lossy file (MP3, AAC, Ogg) has a fixed <b>bitrate</b> budget instead: 320 kbps is about a quarter of CD, 128 kbps about a ninth.
+Its decoder still outputs every sample — the encoder decides what's worth keeping inside the budget.`;
+function setPanels(k){const m={flac:{br:'lossless',hot:3},cd:{sr:'44100',tone:'15000',bd:'16',lv:'-60',hot:1},'320':{br:'320',hot:3},'128':{br:'128',hot:3},'48':{br:'48',hot:3},
+ sr:{sr:'11025',tone:'8000',hot:1},bits:{bd:'8',lv:'-40',hot:2},up:{sr:'up',tone:'8000',hot:1},gen:{br:'gen',hot:3},rate:{sr:'44100',tone:'1000',hot:0}}[k]||{};
+ if(m.sr)$('srSel').value=m.sr;if(m.tone)$('toneSel').value=m.tone;if(m.bd)$('bdSel').value=m.bd;if(m.lv)$('lvSel').value=m.lv;if(m.br)$('brSel').value=m.br;
+ ['P1','P2','P3'].forEach((id,i)=>$(id).classList.toggle('hot',m.hot===i+1));}
+function paperBG(g,W,H){const bg=g.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.7);bg.addColorStop(0,'#f2e9cf');bg.addColorStop(1,'#cdb98d');g.fillStyle=bg;g.fillRect(0,0,W,H);}
+const INK='#2f2b24',BLUE='#3b5a6b',RUST='#a35e43',OLV='#5d6a3a';
+function dots(g,pts,X,Y,y0,col){pts.forEach(([t,v])=>{const x=X(t),y=Y(v);g.strokeStyle='rgba(47,43,36,.45)';g.lineWidth=1;g.beginPath();g.moveTo(x,y0);g.lineTo(x,y);g.stroke();g.fillStyle=INK;g.beginPath();g.arc(x,y,4,0,7);g.fill();g.fillStyle=col;g.beginPath();g.arc(x,y,2.6,0,7);g.fill();});}
+function drawSR(now){const c=$('pSR'),g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
+ const sel=$('srSel').value,up=sel==='up',sr=up?96000:+sel,srcSR=up?11025:sr,f=+$('toneSel').value,nyq=srcSR/2,ok=f<nyq;
+ const win=0.001,off=(now/1000*0.00005)%0.001,l=20,r=W-20,yc=H/2+14,A=(H/2-40),X=t=>l+(r-l)*t/win,Y=v=>yc-v*A;
+ g.strokeStyle='rgba(60,50,35,.3)';g.beginPath();g.moveTo(l,yc);g.lineTo(r,yc);g.stroke();
+ g.setLineDash([3,4]);g.strokeStyle='rgba(60,50,35,.5)';g.lineWidth=1.2;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(Math.sin(2*Math.PI*f*(t+off)));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.setLineDash([]);
+ const pts=[];for(let k=Math.ceil(off*sr);k/sr-off<=win;k++){const t=k/sr-off;if(t<0)continue;pts.push([t,ok?Math.sin(2*Math.PI*f*(t+off)):0]);}
+ if(!ok&&!up){const al=Math.abs(f-Math.round(f/sr)*sr);g.setLineDash([7,5]);g.strokeStyle=RUST;g.lineWidth=1.8;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(Math.sin(2*Math.PI*al*(t+off)*(f>sr/2&&Math.round(f/sr)*sr>f?-1:1)));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.setLineDash([]);
+  g.fillStyle=RUST;g.font='600 13px Barlow Condensed';g.fillText(`dashed red: without a filter this would come back as a FALSE ${Math.round(al)} Hz tone (aliasing)`,l,H-10);}
+ g.strokeStyle=ok?BLUE:RUST;g.lineWidth=2.6;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(ok?Math.sin(2*Math.PI*f*(t+off)):0);x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.lineWidth=1;
+ dots(g,pts,X,Y,yc,ok?BLUE:RUST);
+ g.fillStyle=INK;g.font='600 15px Barlow Condensed';g.fillText(`${pts.length} measurements in 1 ms  ·  can capture up to ${kHz(nyq)} kHz`,l,20);
+ g.font='13px Barlow Condensed';g.fillStyle='rgba(60,50,35,.8)';g.fillText('dotted = the real sound in the air · solid = what the file can play back',l,38);
+ $('nSR').innerHTML=up?`<b>96,000 dots per second — but the ${f/1000} kHz tone was already deleted when the file was 11.025 kHz.</b> The new dots just trace ${ok?'the same tone':'a flat line'}. Upsampling adds data points, never detail.`
+  :ok?`<b>${kHz(sr)} kHz = ${sr.toLocaleString()} measurements per second.</b> A tone can be captured if it's below half the sample rate (${kHz(nyq)} kHz). The ${f/1000} kHz tone is captured ✔ — the dots are enough to rebuild the smooth wave exactly.`
+  :`<b>${kHz(sr)} kHz can only capture up to ${kHz(nyq)} kHz.</b> The ${f/1000} kHz tone is too fast for the dots to follow, so converters filter it out — it's simply gone (solid line flat). Without that filter it would turn into a false lower tone.`;}
+function drawBD(){const c=$('pBD'),g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
+ const bits=+$('bdSel').value,lv=+$('lvSel').value,A=Math.pow(10,lv/20),q=Math.pow(2,bits-1),f=1000,sr=48000,win=0.001;
+ const l=20,r=W-20,yc=H/2+14,half=H/2-40,zoom=1/A,X=t=>l+(r-l)*t/win,Y=v=>yc-v*zoom*half*0.9;
+ const step=1/q,px=step*zoom*half*0.9;
+ if(px>=3){g.strokeStyle='rgba(163,94,67,.35)';for(let L=-Math.ceil(1.1*A*q);L<=Math.ceil(1.1*A*q);L++){const y=Y(L*step);g.beginPath();g.moveTo(l,y);g.lineTo(r,y);g.stroke();}}
+ g.strokeStyle='rgba(60,50,35,.35)';g.beginPath();g.moveTo(l,yc);g.lineTo(r,yc);g.stroke();
+ g.setLineDash([3,4]);g.strokeStyle='rgba(60,50,35,.6)';g.lineWidth=1.2;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(A*Math.sin(2*Math.PI*f*t));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.setLineDash([]);
+ const pts=[];let zero=true;for(let k=0;k<=win*sr;k++){const t=k/sr,v=A*Math.sin(2*Math.PI*f*t),qv=Math.round(v*q)/q;if(qv!==0)zero=false;pts.push([t,qv,v]);}
+ g.strokeStyle=OLV;g.lineWidth=2.2;g.beginPath();pts.forEach(([t,v],i)=>{const x=X(t),y=Y(v);if(!i)g.moveTo(x,y);else{g.lineTo(x,g.__p);g.lineTo(x,y);}g.__p=y;});g.stroke();g.lineWidth=1;
+ pts.forEach(([t,v,tv])=>{if(Math.abs(Y(v)-Y(tv))>1.5){g.strokeStyle=RUST;g.lineWidth=3;g.beginPath();g.moveTo(X(t),Y(tv));g.lineTo(X(t),Y(v));g.stroke();g.lineWidth=1;}});
+ dots(g,pts.map(p=>[p[0],p[1]]),X,Y,yc,OLV);
+ const levels=Math.pow(2,bits).toLocaleString(),dr=(6.02*bits).toFixed(0);
+ g.fillStyle=INK;g.font='600 15px Barlow Condensed';g.fillText(`${levels} possible levels  ·  ≈ ${dr} dB between full scale and the rounding noise`,l,20);
+ g.font='13px Barlow Condensed';g.fillStyle='rgba(60,50,35,.8)';g.fillText(`zoomed ${zoom>1.5?Math.round(zoom)+'× ':''}so the sine fills the screen · red lines = allowed levels · red bars = rounding error`,l,38);
+ if(px<3){g.fillStyle=OLV;g.font='600 13px Barlow Condensed';g.fillText(`steps are too small to draw here (${(1/px).toFixed(0)} levels per pixel) — the stored wave is essentially perfect`,l,H-10);}
+ const span=Math.round(2*A*q);
+ $('nBD').innerHTML=zero?`<b>Every measurement rounds to zero.</b> At ${bits}-bit, a ${lv} dBFS sound is smaller than the first step — the quiet part of the recording is simply erased.`
+  :px>=3?`<b>Each dot must snap to the nearest allowed level.</b> This ${lv} dBFS sine only spans about ${span} levels at ${bits}-bit, so it turns into a staircase. The snapping error (red) is heard as hiss and grit — worst in quiet passages and fades. Dither turns that grit into a smooth, gentle hiss.`
+  :`<b>${bits}-bit gives ${levels} levels.</b> Even this ${lv} dBFS sound uses about ${span.toLocaleString()} of them — far finer than you can hear. That's why 24-bit is the recording standard: lots of room for quiet sounds and for mistakes in gain staging.`;}
+function drawBR(){const c=$('pBR'),g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
+ const key=$('brSel').value,meta=BRS.find(x=>x[0]===key),[cut,thr,coarse,err]=ENC[key],rg=rng(9),rg2=rng(21);
+ const NB=30,fmin=40,fmax=20000,l=46,r=W-14,tp=64,bt=H-34,lo=-90,Y=d=>tp+(bt-tp)*(-Math.max(lo,Math.min(0,d)))/(-lo);
+ // data budget bar
+ g.fillStyle='rgba(60,50,35,.15)';g.fillRect(l,24,r-l,12);g.fillStyle=key==='lossless'?OLV:'#b08f48';g.fillRect(l,24,(r-l)*meta[2]/2304,12);g.strokeStyle=INK;g.strokeRect(l,24,r-l,12);
+ g.fillStyle=INK;g.font='600 14px Barlow Condensed';g.fillText(`DATA BUDGET  ${meta[2].toLocaleString()} kbps  (${Math.round(100*meta[2]/2304)}% of the 24-bit/48 kHz master)`,l,18);
+ for(let d=0;d>=lo;d-=30){g.strokeStyle='rgba(60,50,35,.2)';g.beginPath();g.moveTo(l,Y(d));g.lineTo(r,Y(d));g.stroke();g.fillStyle='#5a5244';g.font='11px Barlow Condensed';g.textAlign='right';g.fillText(d+' dB',l-4,Y(d)+4);}
+ g.textAlign='center';const bw=(r-l)/NB;
+ for(let i=0;i<NB;i++){const f=fmin*Math.pow(fmax/fmin,(i+.5)/NB),x=l+i*bw;
+  let o=-14-7*Math.log2(Math.max(1,f/250))+(rg()-.5)*16;if(i%7===3)o-=22;            // original spectrum (with some quiet bands)
+  const masked=o<thr+3*Math.log2(f/1000+1)*(key==='lossless'?0:1),gone=f>cut||masked;
+  let e=gone?lo:Math.round(o/(coarse||1))*(coarse||1)+(err?(rg2()-.5)*2*err:0);
+  g.strokeStyle='rgba(47,43,36,.55)';g.setLineDash([3,3]);g.strokeRect(x+2,Y(o),bw-4,Y(lo)-Y(o));g.setLineDash([]);
+  if(!gone){g.fillStyle=key==='lossless'?OLV:BLUE;g.fillRect(x+3,Y(e),bw-6,Y(lo)-Y(e));}
+  else{g.fillStyle=RUST;g.font='600 12px Barlow Condensed';g.fillText('×',x+bw/2,Y(o)-3);}
+  if(i%5===0||i===NB-1){g.fillStyle='#4a4235';g.font='11px Barlow Condensed';g.fillText(f>=1000?(f/1000).toFixed(f<10000?1:0)+'k':Math.round(f),x+bw/2,H-14);}}
+ g.textAlign='left';g.fillStyle='#4a4235';g.font='12px Barlow Condensed';g.fillText('dashed = original · solid = what the file keeps · × = thrown away · frequency (Hz) →',l,H-2);
+ $('nBR').innerHTML=key==='lossless'?`<b>Lossless keeps everything.</b> WAV stores every sample as-is; FLAC packs the same samples smaller, like a zip file. Nothing is thrown away.`
+  :`<b>Bitrate isn't about dots.</b> The decoded file still has every sample. A lossy encoder works on frequencies: it cuts the very top end${cut<20000?` (≈ ${(cut/1000).toFixed(1)} kHz here)`:''} and drops quiet details hidden ("masked") by louder ones, then stores what's left with ${coarse>3?'coarse':'fine'} precision. The smaller the budget, the more it throws away${key==='gen'?' — and every re-encode throws away a bit more, plus new errors':''}. <i>Illustration — exact cutoffs vary by encoder.</i>`;}
+['srSel','toneSel','bdSel','lvSel','brSel'].forEach(id=>$(id).onchange=()=>{drawBD();drawBR();});
+function panelsLoop(now){drawSR(now);requestAnimationFrame(panelsLoop);}
+requestAnimationFrame(panelsLoop);
+
+async function init(){srcBytes=W*H*3;$('cA').getContext('2d').drawImage(SRC,0,0);$('stA').textContent=fmtB(srcBytes)+' · uncompressed (like WAV)';await pick(cur);}
+init();
+</script></body></html>
