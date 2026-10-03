@@ -60,6 +60,7 @@ td b{font-family:'Barlow Condensed';font-size:15px}
 .ds{font-size:15px;color:#3f392e}
 .dgrid{display:grid;grid-template-columns:1fr 1.25fr;gap:12px;align-items:start}
 .dgrid.two{grid-template-columns:1fr}
+.dgrid.bd{grid-template-columns:1.5fr 1fr}
 @media(max-width:1200px){.dgrid,.dgrid.two{grid-template-columns:1fr}}
 .kid{font:14.5px/1.5 'Courier Prime',monospace;background:var(--cream);border-radius:2px;padding:10px 12px;box-shadow:0 1px 3px #0005,inset 0 0 26px #c4b48a55}
 .kid b{display:block;font:600 15px 'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase;color:#8a4a35;margin-bottom:6px}
@@ -121,13 +122,14 @@ footer a{color:#e3d2a8}
  </div>
 
  <div class="demo" id="P2">
-  <div class="dhead"><span class="num">2</span><div><div class="dt">Bit depth is the number of marks on the amplitude ruler</div>
-   <div class="ds">How precisely each snapshot's amplitude (the height of the wave) is measured. The loudest possible level is the same at any bit depth; more bits just add finer marks, so <b>quieter</b> sounds can be captured before they're lost in hiss (the dynamic range). It doesn't make anything louder, and it has nothing to do with pitch.</div></div></div>
-  <div class="dgrid">
-   <div><div class="mini">How quiet can it go? · loudest at the top, hiss at the bottom</div><div class="window"><canvas id="ruler" width="600" height="300"></canvas></div></div>
-   <div><div class="mini">One snapshot at a time · each dot snaps to the nearest mark</div><div class="window"><canvas id="pBD" width="760" height="300"></canvas></div></div>
+  <div class="dhead"><span class="num">2</span><div><div class="dt">Bit depth</div>
+   <div class="ds">Bit depth refers to the number of bits of information captured in every single audio sample, which directly determines the amplitude resolution of your digital recording. It measures how accurately you capture the volume of that sound (the vertical amplitude axis).</div></div></div>
+  <div class="dgrid bd">
+   <div><div class="mini">Bars = snapshots · grey lines = the levels a snapshot is allowed to land on</div><div class="window"><canvas id="pBD" width="900" height="420"></canvas></div>
+    <div class="mini" style="margin-top:8px">Magnifier · a tiny piece of the same wave, zoomed way in</div><div class="window"><canvas id="pBDz" width="900" height="230"></canvas></div></div>
+   <div><div class="mini">What that means for quiet sounds · loudest at the top, hiss at the bottom</div><div class="window"><canvas id="ruler" width="600" height="420"></canvas></div></div>
   </div>
-  <div class="ctlrow"><span>Bit depth</span><select id="bdSel"></select><span>Recorded level</span><select id="lvSel"></select></div>
+  <div class="ctlrow"><span>Bit depth</span><select id="bdSel"></select><span>Snapshots</span><select id="colSel"><option value="12">Few (12 in view)</option><option value="24" selected>Medium (24 in view)</option><option value="48">Many (48 in view)</option></select><span>Recorded level</span><select id="lvSel"></select></div>
   <div class="ctlrow"><button class="dbtn" id="dBdM">▶ Hear music at this bit depth</button><button class="dbtn" id="dBdF">▶ Hear a note fading out</button>
    <label class="chk2"><input type="checkbox" id="magTail" checked> Turn up the fade so you can hear its end</label></div>
   <div class="note" id="nBD"></div>
@@ -356,20 +358,20 @@ $('best').innerHTML=`<h3>Best conversion scenario: small files that still sound 
 const kHz=v=>parseFloat((v/1000).toFixed(2));
 const SRS=[[8000,'8,000 snapshots per second (8 kHz)'],[11025,'11,025 snapshots per second (11.025 kHz)'],[22050,'22,050 snapshots per second (22.05 kHz)'],[44100,'44,100 snapshots per second (44.1 kHz)'],[48000,'48,000 snapshots per second (48 kHz)'],[96000,'96,000 snapshots per second (96 kHz)'],['up','96,000 per second, upconverted from 11,025']];
 const TONES=[[1000,'1,000 vibrations/sec · body of a voice'],[4000,'4,000 vibrations/sec · presence'],[8000,'8,000 vibrations/sec · "s" sounds, cymbals'],[15000,'15,000 vibrations/sec · air, sparkle']];
-const BDS=[4,8,12,16,24],LVS=[[-1,'Loud (−1 dBFS)'],[-40,'Quiet (−40 dBFS)'],[-60,'Very quiet (−60 dBFS)']];
+const BDS=[2,3,4,5,8,16,24],LVS=[[-1,'Loud (−1 dBFS)'],[-12,'Quiet (−12 dBFS)'],[-24,'Very quiet (−24 dBFS)']];
 const BRS=[['lossless','WAV / FLAC · lossless (2,304 kbps for 24-bit/48 kHz stereo)',2304],['320','MP3 320 kbps',320],['256','MP3 256 kbps',256],['128','MP3 128 kbps',128],['64','MP3 64 kbps',64],['48','MP3 48 kbps',48],['gen','MP3 128 kbps, re-encoded 8 times',128]];
 // illustrative encoder behaviour (real encoders vary): cutoff Hz, masking threshold dB, coarseness dB
 const ENC={lossless:[22000,-200,0,0],'320':[20000,-80,1,0],'256':[19000,-75,1.5,0],'128':[16000,-62,3,0],'64':[11000,-54,6,0],'48':[9500,-48,8,0],gen:[15000,-55,5,4]};
 const fill=(id,arr)=>{$(id).innerHTML=arr.map(([v,t])=>`<option value="${v}">${t}</option>`).join('');};
-fill('srSel',SRS);fill('toneSel',TONES);fill('bdSel',BDS.map(b=>[b,b+'-bit']));fill('lvSel',LVS);fill('brSel',BRS.map(x=>[x[0],x[1]]));
-$('srSel').value='48000';$('toneSel').value='8000';$('bdSel').value='24';$('lvSel').value='-1';$('brSel').value='lossless';
+fill('srSel',SRS);fill('toneSel',TONES);fill('bdSel',BDS.map(b=>[b,`${b}-bit · ${Math.pow(2,b).toLocaleString()} levels`]));fill('lvSel',LVS);fill('brSel',BRS.map(x=>[x[0],x[1]]));
+$('srSel').value='48000';$('toneSel').value='8000';$('bdSel').value='3';$('lvSel').value='-1';$('brSel').value='lossless';
 $('formula').innerHTML=`<b>How they fit together</b> — uncompressed (WAV) data rate = <b>sample rate × bit depth × channels</b>
   48,000 × 24 × 2 = 2,304 kbps  ≈ 17.3 MB per minute   (24-bit / 48 kHz master)
   44,100 × 16 × 2 = 1,411 kbps  ≈ 10.6 MB per minute   (CD quality)
 A lossy file (MP3, AAC, Ogg) has a fixed <b>bitrate</b> budget instead: 320 kbps is about a quarter of CD, 128 kbps about a ninth.
 Its decoder still outputs every sample — the encoder decides what's worth keeping inside the budget.`;
-function setPanels(k){const m={flac:{br:'lossless',hot:3},cd:{sr:'44100',tone:'15000',bd:'16',lv:'-60',hot:1},'320':{br:'320',hot:3},'128':{br:'128',hot:3},'48':{br:'48',hot:3},
- sr:{sr:'11025',tone:'8000',hot:1},bits:{bd:'8',lv:'-40',hot:2},up:{sr:'up',tone:'8000',hot:1},gen:{br:'gen',hot:3},rate:{sr:'44100',tone:'1000',hot:0}}[k]||{};
+function setPanels(k){const m={flac:{br:'lossless',hot:3},cd:{sr:'44100',tone:'15000',bd:'16',lv:'-1',hot:1},'320':{br:'320',hot:3},'128':{br:'128',hot:3},'48':{br:'48',hot:3},
+ sr:{sr:'11025',tone:'8000',hot:1},bits:{bd:'3',lv:'-1',hot:2},up:{sr:'up',tone:'8000',hot:1},gen:{br:'gen',hot:3},rate:{sr:'44100',tone:'1000',hot:0}}[k]||{};
  if(m.sr)$('srSel').value=m.sr;if(m.tone)$('toneSel').value=m.tone;if(m.bd)$('bdSel').value=m.bd;if(m.lv)$('lvSel').value=m.lv;if(m.br)$('brSel').value=m.br;
  ['P1','P2','P3'].forEach((id,i)=>$(id).classList.toggle('hot',m.hot===i+1));}
 function paperBG(g,W,H){const bg=g.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.7);bg.addColorStop(0,'#f2e9cf');bg.addColorStop(1,'#cdb98d');g.fillStyle=bg;g.fillRect(0,0,W,H);}
@@ -392,24 +394,49 @@ function drawSR(now){const c=$('pSR'),g=c.getContext('2d'),W=c.width,H=c.height;
   :ok?`<b>${sr.toLocaleString()} snapshots per second.</b> Every wiggle of this ${vib(f)} sound gets at least two snapshots, so the dots are enough to rebuild the smooth wave exactly ✔. Rule of thumb: you need more than twice as many snapshots as the fastest vibration.`
   :`<b>${sr.toLocaleString()} snapshots per second is too slow for a ${vib(f)} sound.</b> The wiggles happen faster than the snapshots, so recorders filter that sound out first and it's simply gone (flat line). Without the filter it would come back as a fake, lower sound, like the ball that seems to bounce slowly.`;}
 function drawBD(){const c=$('pBD'),g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
- const bits=+$('bdSel').value,lv=+$('lvSel').value,A=Math.pow(10,lv/20),q=Math.pow(2,bits-1),f=1000,sr=48000,win=0.001;
- const l=20,r=W-20,yc=H/2+14,half=H/2-40,zoom=1/A,X=t=>l+(r-l)*t/win,Y=v=>yc-v*zoom*half*0.9;
- const step=1/q,px=step*zoom*half*0.9;
- if(px>=3){g.strokeStyle='rgba(163,94,67,.35)';for(let L=-Math.ceil(1.1*A*q);L<=Math.ceil(1.1*A*q);L++){const y=Y(L*step);g.beginPath();g.moveTo(l,y);g.lineTo(r,y);g.stroke();}}
- g.strokeStyle='rgba(60,50,35,.35)';g.beginPath();g.moveTo(l,yc);g.lineTo(r,yc);g.stroke();
- g.setLineDash([3,4]);g.strokeStyle='rgba(60,50,35,.6)';g.lineWidth=1.2;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(A*Math.sin(2*Math.PI*f*t));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.setLineDash([]);
- const pts=[];let zero=true;for(let k=0;k<=win*sr;k++){const t=k/sr,v=A*Math.sin(2*Math.PI*f*t),qv=Math.round(v*q)/q;if(qv!==0)zero=false;pts.push([t,qv,v]);}
- g.strokeStyle=OLV;g.lineWidth=2.2;g.beginPath();pts.forEach(([t,v],i)=>{const x=X(t),y=Y(v);if(!i)g.moveTo(x,y);else{g.lineTo(x,g.__p);g.lineTo(x,y);}g.__p=y;});g.stroke();g.lineWidth=1;
- pts.forEach(([t,v,tv])=>{if(Math.abs(Y(v)-Y(tv))>1.5){g.strokeStyle=RUST;g.lineWidth=3;g.beginPath();g.moveTo(X(t),Y(tv));g.lineTo(X(t),Y(v));g.stroke();g.lineWidth=1;}});
- dots(g,pts.map(p=>[p[0],p[1]]),X,Y,yc,OLV);
- const levels=Math.pow(2,bits).toLocaleString(),dr=(6.02*bits).toFixed(0);
- g.fillStyle=INK;g.font='600 15px Barlow Condensed';g.fillText(`${levels} possible levels  ·  ≈ ${dr} dB between full scale and the rounding noise`,l,20);
- g.font='13px Barlow Condensed';g.fillStyle='rgba(60,50,35,.8)';g.fillText(`zoomed ${zoom>1.5?Math.round(zoom)+'× ':''}so the sine fills the screen · red lines = allowed levels · red bars = rounding error`,l,38);
- if(px<3){g.fillStyle=OLV;g.font='600 13px Barlow Condensed';g.fillText(`steps are too small to draw here (${(1/px).toFixed(0)} levels per pixel) — the stored wave is essentially perfect`,l,H-10);}
- const span=Math.round(2*A*q);
- $('nBD').innerHTML=zero?`<b>Every measurement rounds to zero.</b> At ${bits}-bit, a ${lv} dBFS sound is smaller than the first step — the quiet part of the recording is simply erased.`
-  :px>=3?`<b>Each dot must snap to the nearest allowed level.</b> This ${lv} dBFS sine only spans about ${span} levels at ${bits}-bit, so it turns into a staircase. The snapping error (red) is heard as hiss and grit — worst in quiet passages and fades. Dither turns that grit into a smooth, gentle hiss.`
-  :`<b>${bits}-bit gives ${levels} levels.</b> Even this ${lv} dBFS sound uses about ${span.toLocaleString()} of them — far finer than you can hear. That's why 24-bit is the recording standard: lots of room for quiet sounds and for mistakes in gain staging.`;}
+ const bits=+$('bdSel').value,lv=+$('lvSel').value,A=Math.pow(10,lv/20),q=Math.pow(2,bits-1),N=+$('colSel').value;
+ const l=70,r=W-30,top=46,bot=H-46,yc=(top+bot)/2,half=(bot-top)/2,X=u=>l+(r-l)*u,Y=v=>yc-v*half;
+ const wave=u=>A*(0.72*Math.sin(2*Math.PI*1.5*u)+0.24*Math.sin(2*Math.PI*3.6*u+0.6));
+ const qz=v=>Math.max(-1,Math.min((q-1)/q,Math.round(v*q)/q));
+ // level lines
+ const nLev=2*q,showLines=nLev<=64;
+ if(showLines){for(let L=-q;L<q;L++){const y=Y(L/q);g.strokeStyle=L===0?'rgba(60,50,35,.55)':'rgba(60,50,35,.22)';g.lineWidth=1;g.beginPath();g.moveTo(l,y);g.lineTo(r,y);g.stroke();}}
+ else{g.strokeStyle='rgba(60,50,35,.55)';g.beginPath();g.moveTo(l,yc);g.lineTo(r,yc);g.stroke();}
+ // bars
+ const w=(r-l)/N;let maxErr=0;
+ for(let k=0;k<N;k++){const u=k/N,v=qz(wave(u)),x=X(u),y=Y(v);maxErr=Math.max(maxErr,Math.abs(v-wave(u)));
+  g.fillStyle='rgba(220,212,190,.85)';g.fillRect(x,Math.min(y,yc),w,Math.abs(y-yc));
+  g.strokeStyle='#a35e43';g.lineWidth=1.6;g.strokeRect(x,Math.min(y,yc),w,Math.abs(y-yc));}
+ // the real wave
+ g.strokeStyle='#4f8a3a';g.lineWidth=3;g.beginPath();for(let x=l;x<=r;x++){const y=Y(wave((x-l)/(r-l)));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.lineWidth=1;
+ // axes
+ g.strokeStyle='#2f2b24';g.fillStyle='#2f2b24';g.lineWidth=2;g.beginPath();g.moveTo(l,bot+8);g.lineTo(l,top-14);g.stroke();
+ g.beginPath();g.moveTo(l,top-22);g.lineTo(l-6,top-10);g.lineTo(l+6,top-10);g.fill();
+ g.beginPath();g.moveTo(l,yc);g.lineTo(r+14,yc);g.stroke();g.beginPath();g.moveTo(r+22,yc);g.lineTo(r+10,yc-6);g.lineTo(r+10,yc+6);g.fill();g.lineWidth=1;
+ g.font='16px Barlow Condensed';g.textAlign='right';g.fillText('amp.',l-8,top-6);g.textAlign='left';g.fillText('time',r-6,yc+24);
+ // header
+ g.font='600 16px Barlow Condensed';g.fillText(`${bits}-bit: ${Math.pow(2,bits).toLocaleString()} levels${showLines?'':' (too close together to draw)'}   ·   ${N} snapshots`,l+12,24);
+ g.font='13px Barlow Condensed';g.fillStyle='#4f8a3a';g.fillText('green = the real sound',r-300,24);g.fillStyle='#a35e43';g.fillText('bars = what gets stored',r-170,24);g.textAlign='left';
+ const used=Math.round(2*A*0.96*q);
+ $('nBD').innerHTML=showLines?`<b>Every bar must stop exactly on a grey line.</b> With ${Math.pow(2,bits)} levels the bars can't follow the green wave closely, so they stair-step away from it. That mismatch is what you hear as hiss and grit.${A<0.5?` Recorded this quietly, the wave only reaches about ${Math.max(1,used)} of the levels, so it's even rougher. That's why recording level matters.`:''} <b>Bars wider or narrower = sample rate. Lines closer or further apart = bit depth.</b>`
+  :`<b>${bits}-bit has ${Math.pow(2,bits).toLocaleString()} levels.</b> They're so close together the bars land right on the green wave, and the difference is far too small to hear. <b>Bars wider or narrower = sample rate. Lines closer or further apart = bit depth.</b>`;
+ drawZoom();drawRuler();}
+function drawZoom(){const c=$('pBDz');if(!c)return;const g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
+ const bits=+$('bdSel').value,A=Math.pow(10,+$('lvSel').value/20),q=Math.pow(2,bits-1);
+ const wave=u=>A*(0.72*Math.sin(2*Math.PI*1.5*u)+0.24*Math.sin(2*Math.PI*3.6*u+0.6));
+ const u0=0.425,du=0.004,M=40;let mn=1e9,mx=-1e9;for(let i=0;i<=200;i++){const v=wave(u0+du*i/200);mn=Math.min(mn,v);mx=Math.max(mx,v);}
+ const qq=v=>Math.round(v*q)/q;let lo=Math.min(mn,qq(mn),qq(mx)),hi=Math.max(mx,qq(mn),qq(mx));
+ const cen=(lo+hi)/2,hw=Math.max(1e-6,(hi-lo)/2*1.3),zoom=1/hw;
+ const l=20,r=W-20,top=34,bot=H-30,X=i=>l+(r-l)*i,Y=v=>bot-(v-(cen-hw))/(2*hw)*(bot-top);
+ const step=1/q,px=step/(2*hw)*(bot-top),lines=Math.round(2*hw/step);
+ if(px>=5){const L0=Math.ceil((cen-hw)/step),L1=Math.floor((cen+hw)/step);g.strokeStyle='rgba(60,50,35,.3)';for(let L=L0;L<=L1;L++){const y=Y(L*step);g.beginPath();g.moveTo(l,y);g.lineTo(r,y);g.stroke();}}
+ const qz=v=>Math.round(v*q)/q,w=(r-l)/M;
+ for(let k=0;k<M;k++){const v=qz(wave(u0+du*k/M)),x=l+k*w,y=Math.max(top-6,Math.min(bot,Y(v)));g.fillStyle='rgba(220,212,190,.85)';g.fillRect(x,y,w,bot-y);g.strokeStyle='#a35e43';g.lineWidth=1.4;g.strokeRect(x,y,w,bot-y);}
+ g.strokeStyle='#4f8a3a';g.lineWidth=3;g.beginPath();for(let x=l;x<=r;x++){const y=Y(wave(u0+du*(x-l)/(r-l)));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.lineWidth=1;
+ g.fillStyle='#2f2b24';g.font='600 16px Barlow Condensed';
+ g.fillText(`Zoomed in ${Math.round(zoom).toLocaleString()}× · ${bits}-bit puts about ${lines.toLocaleString()} level${lines===1?'':'s'} in this view`,l,22);
+ const verdict=lines<3?'✖ The whole piece rounds to the same level: the wave’s shape is lost':lines<40?'✖ You can see the steps: the bars miss the wave':lines<400?'~ Tiny steps, only visible this zoomed in':'✔ Smooth even this zoomed in: the steps are far too small to see or hear';
+ g.font='600 15px Barlow Condensed';g.fillStyle=lines<40?'#a35e43':lines<400?'#8a6a25':'#5d6a3a';g.textAlign='right';g.fillText(verdict,r,H-8);g.textAlign='left';}
 function drawBR(){const c=$('pBR'),g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
  const key=$('brSel').value,meta=BRS.find(x=>x[0]===key),[cut,thr,coarse,err]=ENC[key],rg=rng(9),rg2=rng(21);
  const NB=30,fmin=40,fmax=20000,l=46,r=W-14,tp=64,bt=H-34,lo=-90,Y=d=>tp+(bt-tp)*(-Math.max(lo,Math.min(0,d)))/(-lo);
@@ -429,7 +456,7 @@ function drawBR(){const c=$('pBR'),g=c.getContext('2d'),W=c.width,H=c.height;pap
  g.textAlign='left';g.fillStyle='#4a4235';g.font='12px Barlow Condensed';g.fillText('dashed = original · solid = what the file keeps · × = thrown away · frequency (Hz) →',l,H-2);
  $('nBR').innerHTML=key==='lossless'?`<b>Lossless keeps everything.</b> WAV stores every sample as-is; FLAC packs the same samples smaller, like a zip file. Nothing is thrown away.`
   :`<b>Bitrate isn't about dots.</b> The decoded file still has every sample. A lossy encoder works on frequencies: it cuts the very top end${cut<20000?` (≈ ${(cut/1000).toFixed(1)} kHz here)`:''} and drops quiet details hidden ("masked") by louder ones, then stores what's left with ${coarse>3?'coarse':'fine'} precision. The smaller the budget, the more it throws away${key==='gen'?' — and every re-encode throws away a bit more, plus new errors':''}. <i>Illustration — exact cutoffs vary by encoder.</i>`;}
-['srSel','toneSel','bdSel','lvSel','brSel'].forEach(id=>$(id).onchange=()=>{drawBD();drawBR();drawRuler();});
+['srSel','toneSel','bdSel','lvSel','brSel','colSel'].forEach(id=>$(id).onchange=()=>{drawBD();drawBR();drawRuler();});
 
 // ---------- simple-explanation demos ----------
 const effSR=()=>{const v=$('srSel').value;return v==='up'?11025:+v;};
