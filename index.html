@@ -52,8 +52,23 @@ td{padding:6px;border-bottom:1px solid #c9bc98;vertical-align:top}
 td b{font-family:'Barlow Condensed';font-size:15px}
 .ladder td:first-child{white-space:nowrap}
 
-.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px}
-@media(max-width:1300px){.tri{grid-template-columns:1fr}}
+.demo{margin-top:16px;padding:12px;border-radius:4px;border:2px solid transparent;background:rgba(255,255,255,.12)}
+.demo.hot{border-color:#d9a441;background:rgba(217,164,65,.1)}
+.dhead{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.dhead .num{flex:0 0 34px;height:34px;border-radius:50%;background:#2f2b24;color:#e9e1cb;font:600 20px 'Barlow Condensed';display:flex;align-items:center;justify-content:center}
+.dt{font:600 21px 'Barlow Condensed';letter-spacing:.02em}
+.ds{font-size:15px;color:#3f392e}
+.dgrid{display:grid;grid-template-columns:1fr 1.25fr;gap:12px;align-items:start}
+.dgrid.two{grid-template-columns:1fr}
+@media(max-width:1200px){.dgrid,.dgrid.two{grid-template-columns:1fr}}
+.kid{font:14.5px/1.5 'Courier Prime',monospace;background:var(--cream);border-radius:2px;padding:10px 12px;box-shadow:0 1px 3px #0005,inset 0 0 26px #c4b48a55}
+.kid b{display:block;font:600 15px 'Barlow Condensed';letter-spacing:.08em;text-transform:uppercase;color:#8a4a35;margin-bottom:6px}
+.mini{font:10px Michroma,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#3b3830;margin:0 0 5px}
+.ctlrow{flex-wrap:wrap;margin-top:8px}
+.dbtn{flex:0 0 auto}
+.dbtn.on{outline:2px solid #d9a441}
+.chk2{display:flex;align-items:center;gap:6px;font-size:14px}
+
 .pnl{padding:8px;border-radius:4px;border:2px solid transparent}
 .pnl.hot{border-color:#d9a441;background:rgba(217,164,65,.08)}
 .ctlrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:14px}
@@ -89,18 +104,42 @@ footer a{color:#e3d2a8}
 </section>
 
 <section class="plate">
- <div class="lbl">Three different things people mix up · each one on its own</div>
+ <div class="lbl">Sample rate, bit depth, bitrate · three things people mix up, explained simply and then shown</div>
  <div class="card formula" id="formula"></div>
- <div class="tri">
-  <div class="pnl" id="P1"><div class="lbl">① Sample rate · how OFTEN the wave is measured</div>
-   <div class="ctlrow"><span>Sample rate</span><select id="srSel"></select><span>Tone</span><select id="toneSel"></select></div>
-   <div class="window"><canvas id="pSR" width="760" height="300"></canvas></div><div class="note" id="nSR"></div></div>
-  <div class="pnl" id="P2"><div class="lbl">② Bit depth · how PRECISELY each measurement is stored</div>
-   <div class="ctlrow"><span>Bit depth</span><select id="bdSel"></select><span>Level</span><select id="lvSel"></select></div>
-   <div class="window"><canvas id="pBD" width="760" height="300"></canvas></div><div class="note" id="nBD"></div></div>
-  <div class="pnl" id="P3"><div class="lbl">③ Bitrate · how much DATA per second a lossy file may use</div>
-   <div class="ctlrow"><span>Format</span><select id="brSel"></select></div>
-   <div class="window"><canvas id="pBR" width="760" height="300"></canvas></div><div class="note" id="nBR"></div></div>
+
+ <div class="demo" id="P1">
+  <div class="dhead"><span class="num">1</span><div><div class="dt">Sample rate is the frame rate of sound</div>
+   <div class="ds">How many snapshots of the sound are taken every second. "44.1 kHz" just means <b>44,100 snapshots per second</b>, the same way a camera shoots 24 frames per second. It's a counting speed, not a sound you hear. It decides how <b>high</b> a pitch can be captured.</div></div></div>
+  <div class="dgrid">
+   <div><div class="mini">The camera version · a bouncing ball, filmed frame by frame</div><div class="window"><canvas id="wheel" width="600" height="300"></canvas></div></div>
+   <div><div class="mini">The sound version · one pitch, measured as dots</div><div class="window"><canvas id="pSR" width="760" height="300"></canvas></div></div>
+  </div>
+  <div class="ctlrow"><span>Snapshots</span><select id="srSel"></select><span>Pitch</span><select id="toneSel"></select></div>
+  <div class="ctlrow"><button class="dbtn" id="dSrM">▶ Hear music at this sample rate</button><button class="dbtn" id="dSrS">▶ Hear a rising whistle</button>
+   <label class="chk2"><input type="checkbox" id="noFilt"> Skip the filter (hear the fake sounds it creates)</label></div>
+  <div class="note" id="nSR"></div>
+ </div>
+
+ <div class="demo" id="P2">
+  <div class="dhead"><span class="num">2</span><div><div class="dt">Bit depth is the number of marks on the amplitude ruler</div>
+   <div class="ds">How precisely each snapshot's amplitude (the height of the wave) is measured. The loudest possible level is the same at any bit depth; more bits just add finer marks, so <b>quieter</b> sounds can be captured before they're lost in hiss (the dynamic range). It doesn't make anything louder, and it has nothing to do with pitch.</div></div></div>
+  <div class="dgrid">
+   <div><div class="mini">How quiet can it go? · loudest at the top, hiss at the bottom</div><div class="window"><canvas id="ruler" width="600" height="300"></canvas></div></div>
+   <div><div class="mini">One snapshot at a time · each dot snaps to the nearest mark</div><div class="window"><canvas id="pBD" width="760" height="300"></canvas></div></div>
+  </div>
+  <div class="ctlrow"><span>Bit depth</span><select id="bdSel"></select><span>Recorded level</span><select id="lvSel"></select></div>
+  <div class="ctlrow"><button class="dbtn" id="dBdM">▶ Hear music at this bit depth</button><button class="dbtn" id="dBdF">▶ Hear a note fading out</button>
+   <label class="chk2"><input type="checkbox" id="magTail" checked> Turn up the fade so you can hear its end</label></div>
+  <div class="note" id="nBD"></div>
+ </div>
+
+ <div class="demo" id="P3">
+  <div class="dhead"><span class="num">3</span><div><div class="dt">Bitrate is the size of the backpack</div>
+   <div class="ds">How much data per second a file is allowed to use. For MP3 and other lossy files, the encoder decides what to leave behind to fit.</div></div></div>
+  <div class="dgrid two">
+   <div><div class="ctlrow"><span>Format</span><select id="brSel"></select></div><div class="window"><canvas id="pBR" width="760" height="300"></canvas></div></div>
+  </div>
+  <div class="note" id="nBR"></div>
  </div>
 </section>
 <section class="plate">
@@ -135,6 +174,21 @@ Photo effects are real conversions done in your browser (JPEG compression, resam
 </div>
 
 <script>
+// ---- Mobile audio unlock (iPhone silent switch / tap-to-start rules) ----
+const MobileAudio=(()=>{let el=null;
+ function silentURL(){const sr=8000,n=sr/2,b=new ArrayBuffer(44+n),v=new DataView(b),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  w(0,'RIFF');v.setUint32(4,36+n,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr,true);
+  v.setUint16(32,1,true);v.setUint16(34,8,true);w(36,'data');v.setUint32(40,n,true);for(let i=0;i<n;i++)v.setUint8(44+i,128);return URL.createObjectURL(new Blob([b],{type:'audio/wav'}));}
+ function unlock(ctx){
+  try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+  try{if(!el){el=document.createElement('audio');el.src=silentURL();el.loop=true;el.setAttribute('playsinline','');el.setAttribute('webkit-playsinline','');}
+   const p=el.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}
+  if(ctx){try{if(ctx.state!=='running'){const r=ctx.resume();if(r&&r.catch)r.catch(()=>{});}
+   const b=ctx.createBuffer(1,1,22050),s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start(0);}catch(e){}
+   if(!ctx.__mw){ctx.__mw=1;const wake=()=>{if(ctx.state!=='running'&&ctx.state!=='closed')ctx.resume().catch(()=>{});};
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake();});['touchend','pointerup','keydown'].forEach(ev=>document.addEventListener(ev,wake,{passive:true}));}}}
+ return {unlock};})();
+
 const $=id=>document.getElementById(id);
 const W=960,H=600;
 function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
@@ -218,7 +272,7 @@ const VC={ok:'#8f9e5c',warn:'#cfa64e',bad:'#c4644a'},VT={ok:'GOOD CONVERSION',wa
 // ---------- UI ----------
 let cur=3,OUT=null,focus={x:170,y:150},srcBytes=0;
 function combos(){$('combos').innerHTML=C.map((c,i)=>`<button class="combo${i===cur?' on':''}" style="--c:${VC[c.v]}" onclick="pick(${i})"><span class="t">${i+1}. ${c.t}</span><small>${c.s}</small></button>`).join('');}
-async function pick(i){cur=i;combos();const c=C[i];setPanels(c.k);drawBD();drawBR();$('capB').textContent='Converted · '+c.img;
+async function pick(i){cur=i;combos();const c=C[i];setPanels(c.k);drawBD();drawBR();drawRuler();$('capB').textContent='Converted · '+c.img;
  $('info').innerHTML=`<span class="tag" style="background:${VC[c.v]}">${VT[c.v]}</span><h3>${c.audio}</h3><b>Photo equivalent:</b> ${c.img}\n<b>Size:</b> ${c.mbl} MB per minute (stereo)\n\n${c.txt}\n\n<b>Verdict:</b> ${c.use}`;
  $('stB').textContent='working…';OUT=await c.run(SRC);$('stB').textContent=fmtB(OUT.bytes)+' · '+(100*OUT.bytes/srcBytes).toFixed(0)+'% of original';
  $('cB').getContext('2d').drawImage(OUT.c,0,0,W,H);loupes();bars();
@@ -250,7 +304,7 @@ function synthMusic(sr){const dur=6,n=sr*dur,L=new Float32Array(n),r=rng(3),bpm=
  // simple high-pass for the hat noise feel
  let p=0;for(let i=0;i<n;i++){const y=L[i];L[i]=y-0.0*p;p=y;}
  return L;}
-async function ensureCtx(){if(!AU.ctx){AU.ctx=new (window.AudioContext||window.webkitAudioContext)();}await AU.ctx.resume();
+async function ensureCtx(){if(!AU.ctx){AU.ctx=new (window.AudioContext||window.webkitAudioContext)();}MobileAudio.unlock(AU.ctx);await AU.ctx.resume();
  if(!AU.buf){const sr=AU.ctx.sampleRate,b=AU.ctx.createBuffer(1,sr*6,sr);b.copyToChannel(synthMusic(sr),0);AU.buf=b;}}
 async function process(au){const key=JSON.stringify(au);if(AU.cache[key])return AU.cache[key];const src=AU.buf;let out=src;
  if(au.type==='sr'){const off1=new OfflineAudioContext(src.numberOfChannels,src.length,src.sampleRate),s1=off1.createBufferSource();s1.buffer=src;
@@ -300,8 +354,8 @@ $('best').innerHTML=`<h3>Best conversion scenario: small files that still sound 
 
 // ---------- three concept panels ----------
 const kHz=v=>parseFloat((v/1000).toFixed(2));
-const SRS=[[8000,'8 kHz'],[11025,'11.025 kHz'],[22050,'22.05 kHz'],[44100,'44.1 kHz'],[48000,'48 kHz'],[96000,'96 kHz'],['up','96 kHz — upconverted from 11.025 kHz']];
-const TONES=[[1000,'1 kHz · body of a voice'],[4000,'4 kHz · presence'],[8000,'8 kHz · "s" sounds, cymbals'],[15000,'15 kHz · air, sparkle']];
+const SRS=[[8000,'8,000 snapshots per second (8 kHz)'],[11025,'11,025 snapshots per second (11.025 kHz)'],[22050,'22,050 snapshots per second (22.05 kHz)'],[44100,'44,100 snapshots per second (44.1 kHz)'],[48000,'48,000 snapshots per second (48 kHz)'],[96000,'96,000 snapshots per second (96 kHz)'],['up','96,000 per second, upconverted from 11,025']];
+const TONES=[[1000,'1,000 vibrations/sec · body of a voice'],[4000,'4,000 vibrations/sec · presence'],[8000,'8,000 vibrations/sec · "s" sounds, cymbals'],[15000,'15,000 vibrations/sec · air, sparkle']];
 const BDS=[4,8,12,16,24],LVS=[[-1,'Loud (−1 dBFS)'],[-40,'Quiet (−40 dBFS)'],[-60,'Very quiet (−60 dBFS)']];
 const BRS=[['lossless','WAV / FLAC · lossless (2,304 kbps for 24-bit/48 kHz stereo)',2304],['320','MP3 320 kbps',320],['256','MP3 256 kbps',256],['128','MP3 128 kbps',128],['64','MP3 64 kbps',64],['48','MP3 48 kbps',48],['gen','MP3 128 kbps, re-encoded 8 times',128]];
 // illustrative encoder behaviour (real encoders vary): cutoff Hz, masking threshold dB, coarseness dB
@@ -328,14 +382,15 @@ function drawSR(now){const c=$('pSR'),g=c.getContext('2d'),W=c.width,H=c.height;
  g.setLineDash([3,4]);g.strokeStyle='rgba(60,50,35,.5)';g.lineWidth=1.2;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(Math.sin(2*Math.PI*f*(t+off)));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.setLineDash([]);
  const pts=[];for(let k=Math.ceil(off*sr);k/sr-off<=win;k++){const t=k/sr-off;if(t<0)continue;pts.push([t,ok?Math.sin(2*Math.PI*f*(t+off)):0]);}
  if(!ok&&!up){const al=Math.abs(f-Math.round(f/sr)*sr);g.setLineDash([7,5]);g.strokeStyle=RUST;g.lineWidth=1.8;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(Math.sin(2*Math.PI*al*(t+off)*(f>sr/2&&Math.round(f/sr)*sr>f?-1:1)));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.setLineDash([]);
-  g.fillStyle=RUST;g.font='600 13px Barlow Condensed';g.fillText(`dashed red: without a filter this would come back as a FALSE ${Math.round(al)} Hz tone (aliasing)`,l,H-10);}
+  g.fillStyle=RUST;g.font='600 13px Barlow Condensed';g.fillText(`dashed red: without a filter it would come back as a FAKE sound at ${Math.round(al).toLocaleString()} vibrations per second`,l,H-10);}
  g.strokeStyle=ok?BLUE:RUST;g.lineWidth=2.6;g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(ok?Math.sin(2*Math.PI*f*(t+off)):0);x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.lineWidth=1;
  dots(g,pts,X,Y,yc,ok?BLUE:RUST);
- g.fillStyle=INK;g.font='600 15px Barlow Condensed';g.fillText(`${pts.length} measurements in 1 ms  ·  can capture up to ${kHz(nyq)} kHz`,l,20);
- g.font='13px Barlow Condensed';g.fillStyle='rgba(60,50,35,.8)';g.fillText('dotted = the real sound in the air · solid = what the file can play back',l,38);
- $('nSR').innerHTML=up?`<b>96,000 dots per second — but the ${f/1000} kHz tone was already deleted when the file was 11.025 kHz.</b> The new dots just trace ${ok?'the same tone':'a flat line'}. Upsampling adds data points, never detail.`
-  :ok?`<b>${kHz(sr)} kHz = ${sr.toLocaleString()} measurements per second.</b> A tone can be captured if it's below half the sample rate (${kHz(nyq)} kHz). The ${f/1000} kHz tone is captured ✔ — the dots are enough to rebuild the smooth wave exactly.`
-  :`<b>${kHz(sr)} kHz can only capture up to ${kHz(nyq)} kHz.</b> The ${f/1000} kHz tone is too fast for the dots to follow, so converters filter it out — it's simply gone (solid line flat). Without that filter it would turn into a false lower tone.`;}
+ const vib=n=>n.toLocaleString()+' vibrations per second';
+ g.fillStyle=INK;g.font='600 15px Barlow Condensed';g.fillText(`${pts.length} snapshots in this 1/1000 of a second  ·  fastest sound it can hold: ${vib(Math.round(nyq))}`,l,20);
+ g.font='13px Barlow Condensed';g.fillStyle='rgba(60,50,35,.8)';g.fillText('dotted = the real sound in the air · solid = what the file can play back · dots = snapshots',l,38);
+ $('nSR').innerHTML=up?`<b>96,000 snapshots per second now, but the ${vib(f)} sound was already deleted back when the file only had 11,025 snapshots per second.</b> The extra snapshots just trace ${ok?'the same sound':'a flat line'}. More snapshots can't bring back what was never captured.`
+  :ok?`<b>${sr.toLocaleString()} snapshots per second.</b> Every wiggle of this ${vib(f)} sound gets at least two snapshots, so the dots are enough to rebuild the smooth wave exactly ✔. Rule of thumb: you need more than twice as many snapshots as the fastest vibration.`
+  :`<b>${sr.toLocaleString()} snapshots per second is too slow for a ${vib(f)} sound.</b> The wiggles happen faster than the snapshots, so recorders filter that sound out first and it's simply gone (flat line). Without the filter it would come back as a fake, lower sound, like the ball that seems to bounce slowly.`;}
 function drawBD(){const c=$('pBD'),g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
  const bits=+$('bdSel').value,lv=+$('lvSel').value,A=Math.pow(10,lv/20),q=Math.pow(2,bits-1),f=1000,sr=48000,win=0.001;
  const l=20,r=W-20,yc=H/2+14,half=H/2-40,zoom=1/A,X=t=>l+(r-l)*t/win,Y=v=>yc-v*zoom*half*0.9;
@@ -374,8 +429,71 @@ function drawBR(){const c=$('pBR'),g=c.getContext('2d'),W=c.width,H=c.height;pap
  g.textAlign='left';g.fillStyle='#4a4235';g.font='12px Barlow Condensed';g.fillText('dashed = original · solid = what the file keeps · × = thrown away · frequency (Hz) →',l,H-2);
  $('nBR').innerHTML=key==='lossless'?`<b>Lossless keeps everything.</b> WAV stores every sample as-is; FLAC packs the same samples smaller, like a zip file. Nothing is thrown away.`
   :`<b>Bitrate isn't about dots.</b> The decoded file still has every sample. A lossy encoder works on frequencies: it cuts the very top end${cut<20000?` (≈ ${(cut/1000).toFixed(1)} kHz here)`:''} and drops quiet details hidden ("masked") by louder ones, then stores what's left with ${coarse>3?'coarse':'fine'} precision. The smaller the budget, the more it throws away${key==='gen'?' — and every re-encode throws away a bit more, plus new errors':''}. <i>Illustration — exact cutoffs vary by encoder.</i>`;}
-['srSel','toneSel','bdSel','lvSel','brSel'].forEach(id=>$(id).onchange=()=>{drawBD();drawBR();});
-function panelsLoop(now){drawSR(now);requestAnimationFrame(panelsLoop);}
+['srSel','toneSel','bdSel','lvSel','brSel'].forEach(id=>$(id).onchange=()=>{drawBD();drawBR();drawRuler();});
+
+// ---------- simple-explanation demos ----------
+const effSR=()=>{const v=$('srSel').value;return v==='up'?11025:+v;};
+function drawWheel(){const c=$('wheel');if(!c)return;const g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
+ const sr=effSR(),f=+$('toneSel').value,win=0.0005,l=16,r=W-16,top=58,bot=228,mid=(top+bot)/2,amp=(bot-top)/2-16;
+ const X=t=>l+(r-l)*t/win,Y=v=>mid-v*amp,n=Math.round(win*sr);
+ // film strip
+ g.fillStyle='#2f2b24';g.fillRect(l-6,top-22,r-l+12,bot-top+44);
+ g.fillStyle='#d8cdb0';for(let x=l;x<r;x+=14){g.fillRect(x,top-16,8,8);g.fillRect(x,bot+8,8,8);}
+ const fw=(r-l)/n;
+ for(let k=0;k<n;k++){const x=l+k*fw;g.fillStyle='#efe6cf';g.fillRect(x+1.5,top,fw-3,bot-top);}
+ // the real bounce path, faint
+ g.strokeStyle='rgba(163,94,67,.35)';g.lineWidth=1.5;g.setLineDash([4,4]);g.beginPath();for(let x=l;x<=r;x++){const t=(x-l)/(r-l)*win,y=Y(Math.sin(2*Math.PI*f*t));x===l?g.moveTo(x,y):g.lineTo(x,y);}g.stroke();g.setLineDash([]);
+ // what the frames show (ball in each frame) + the motion you'd see flipping them
+ const pts=[];for(let k=0;k<n;k++){const t=(k+0.5)/sr;pts.push([l+(k+0.5)*fw,Y(Math.sin(2*Math.PI*f*t))]);}
+ const ok=f<sr/2;
+ g.strokeStyle=ok?'#3b5a6b':'#a35e43';g.lineWidth=2.5;g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.lineWidth=1;
+ pts.forEach(([x,y])=>{const rad=Math.max(3,Math.min(10,fw*0.32));g.fillStyle='#2f2b24';g.beginPath();g.arc(x,y,rad+1.5,0,7);g.fill();g.fillStyle=ok?'#6f8fa0':'#c4644a';g.beginPath();g.arc(x,y,rad,0,7);g.fill();});
+ g.textAlign='center';g.fillStyle='#2f2b24';g.font='600 15px Barlow Condensed';
+ g.fillText(`${n} frames · the ball really bounces ${(f*win).toFixed(f*win%1?1:0)} times in this stretch`,W/2,22);
+ const al=Math.abs(f-Math.round(f/sr)*sr),looks=ok?'✔ Flip the frames: the ball bounces just like the real one':al<sr*0.004?'✖ Flip the frames: the ball looks like it isn’t moving':'✖ Flip the frames: the ball looks like it bounces slowly (fake)';
+ g.font='600 16px Barlow Condensed';g.fillStyle=ok?'#5d6a3a':'#a35e43';g.fillText(looks,W/2,H-12);
+ g.font='12px Barlow Condensed';g.fillStyle='#6d6555';g.fillText('dashed = the real bounce · balls = what each frame caught · solid line = what you see when you flip through',W/2,H-30);g.textAlign='left';}
+const RULER=[[-3,'Drum hit, shout'],[-18,'Normal talking'],[-35,'Quiet talking'],[-50,'Whisper'],[-65,'Echo fading away'],[-80,'Room tone, a breath'],[-100,'Last moment of a fade'],[-120,'Quieter than any real room']];
+function drawRuler(){const c=$('ruler');if(!c)return;const g=c.getContext('2d'),W=c.width,H=c.height;paperBG(g,W,H);
+ const bits=+$('bdSel').value,floor=-6.02*bits,tp=36,bt=H-14,lo=-150,Y=d=>tp+(bt-tp)*(-d)/(-lo),x0=70,x1=W-20;
+ g.fillStyle='rgba(163,94,67,.22)';g.fillRect(x0,Y(floor),x1-x0,bt-Y(floor));
+ g.save();g.beginPath();g.rect(x0,Y(floor),x1-x0,bt-Y(floor));g.clip();g.strokeStyle='rgba(163,94,67,.35)';for(let x=x0-300;x<x1;x+=10){g.beginPath();g.moveTo(x,bt);g.lineTo(x+(bt-Y(floor)),Y(floor));g.stroke();}g.restore();
+ g.strokeStyle='#2f2b24';g.lineWidth=2;g.beginPath();g.moveTo(x0,tp);g.lineTo(x0,bt);g.stroke();g.lineWidth=1;
+ g.font='12px Barlow Condensed';g.textAlign='right';g.fillStyle='#4a4235';for(let d=0;d>=lo;d-=30){g.fillText(d+' dB',x0-8,Y(d)+4);g.beginPath();g.moveTo(x0-4,Y(d));g.lineTo(x0,Y(d));g.stroke();}
+ g.textAlign='left';
+ RULER.forEach(([d,t])=>{const lost=d<floor,y=Y(d);g.fillStyle=lost?'#9b8f78':'#2f2b24';g.beginPath();g.arc(x0+16,y,5,0,7);g.fill();
+  g.font=(lost?'':'600 ')+'15px Barlow Condensed';g.fillText(t+(lost?'  — lost in the hiss':''),x0+28,y+5);
+  if(lost){const w=g.measureText(t).width;g.strokeStyle='#9b8f78';g.beginPath();g.moveTo(x0+28,y);g.lineTo(x0+28+w,y);g.stroke();}});
+ g.strokeStyle='#a35e43';g.lineWidth=2.5;g.setLineDash([8,5]);g.beginPath();g.moveTo(x0,Y(floor));g.lineTo(x1,Y(floor));g.stroke();g.setLineDash([]);g.lineWidth=1;
+ g.fillStyle='#a35e43';g.font='600 14px Barlow Condensed';g.textAlign='right';g.fillText(`HISS FLOOR at ${bits}-bit ≈ ${floor.toFixed(0)} dB`,x1-4,Math.min(bt-4,Y(floor)-6));g.textAlign='left';
+ g.fillStyle='#2f2b24';g.font='600 15px Barlow Condensed';g.fillText(`${bits}-bit = ${Math.pow(2,bits).toLocaleString()} marks on the ruler ≈ ${(-floor).toFixed(0)} dB from loudest to the hiss`,x0-50,22);}
+// --- demo audio ---
+const DA={src:null,which:null};
+function dStop(){if(DA.src){try{DA.src.stop();}catch(e){}}DA.src=null;DA.which=null;document.querySelectorAll('.dbtn').forEach(b=>{b.classList.remove('on');b.textContent=b.textContent.replace('■ Stop: ','▶ ');});}
+function sweepBuf(ctx){const sr=ctx.sampleRate,n=sr*6,b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);let ph=0;
+ for(let i=0;i<n;i++){const u=i/n,f=200*Math.pow(18000/200,u);ph+=f/sr;d[i]=0.25*Math.sin(2*Math.PI*ph)*Math.min(1,i/2000,(n-i)/2000);}return b;}
+function fadeBuf(ctx){const sr=ctx.sampleRate,n=sr*5,b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0),fs=[220,277.2,329.6,440];
+ for(let i=0;i<n;i++){const t=i/sr;let x=0;fs.forEach((f,k)=>{for(let h=1;h<=5;h++)x+=0.09/h*Math.sin(2*Math.PI*f*h*t+k)*Math.exp(-t*(h*0.5));});d[i]=x*Math.exp(-t/0.6)*Math.min(1,i/200);}return b;}
+async function resampleTo(buf,sr,filter){if(filter){const off1=new OfflineAudioContext(1,buf.length,buf.sampleRate),s1=off1.createBufferSource();s1.buffer=buf;
+  let n=s1;for(let i=0;i<4;i++){const f=off1.createBiquadFilter();f.type='lowpass';f.frequency.value=Math.min(sr*0.45,buf.sampleRate*0.45);f.Q.value=0.707;n.connect(f);n=f;}n.connect(off1.destination);s1.start();const lp=await off1.startRendering();
+  const off2=new OfflineAudioContext(1,Math.ceil(buf.length*sr/buf.sampleRate),sr),s2=off2.createBufferSource();s2.buffer=lp;s2.connect(off2.destination);s2.start();return off2.startRendering();}
+ const src=buf.getChannelData(0),o=AU.ctx.createBuffer(1,buf.length,buf.sampleRate),d=o.getChannelData(0),step=buf.sampleRate/sr;   // no filter: grab every Nth snapshot and hold it
+ for(let i=0;i<d.length;i++){d[i]=src[Math.floor(Math.floor(i/step)*step)];}return o;}
+function quantLevel(buf,bits,lvDb,mag){const A=Math.pow(10,lvDb/20),q=Math.pow(2,bits-1),o=AU.ctx.createBuffer(1,buf.length,buf.sampleRate),s=buf.getChannelData(0),d=o.getChannelData(0),sr=buf.sampleRate;
+ for(let i=0;i<s.length;i++){let v=Math.round(s[i]*A*q)/q/A;if(mag)v*=Math.min(400,Math.exp((i/sr)/0.6))*0.5;d[i]=Math.max(-1,Math.min(1,v));}return o;}
+async function dPlay(which,btn){await ensureCtx();if(DA.which===which){dStop();return;}dStop();stop();let buf;
+ if(which==='srM')buf=await resampleTo(mono(AU.buf),effSR(),!$('noFilt').checked);
+ if(which==='srS')buf=await resampleTo(sweepBuf(AU.ctx),effSR(),!$('noFilt').checked);
+ if(which==='bdM')buf=quantLevel(mono(AU.buf),+$('bdSel').value,+$('lvSel').value,false);
+ if(which==='bdF')buf=quantLevel(fadeBuf(AU.ctx),+$('bdSel').value,+$('lvSel').value,$('magTail').checked);
+ const s=AU.ctx.createBufferSource();s.buffer=buf;s.loop=true;const g=AU.ctx.createGain();g.gain.value=0.6;s.connect(g);g.connect(AU.ctx.destination);s.start();
+ DA.src=s;DA.which=which;btn.classList.add('on');btn.textContent=btn.textContent.replace('▶ ','■ Stop: ');}
+function mono(b){if(b.numberOfChannels===1)return b;const o=AU.ctx.createBuffer(1,b.length,b.sampleRate),d=o.getChannelData(0);for(let c=0;c<b.numberOfChannels;c++){const s=b.getChannelData(c);for(let i=0;i<s.length;i++)d[i]+=s[i]/b.numberOfChannels;}return o;}
+[['dSrM','srM'],['dSrS','srS'],['dBdM','bdM'],['dBdF','bdF']].forEach(([id,w])=>{$(id).onclick=()=>dPlay(w,$(id));});
+['srSel','noFilt','bdSel','lvSel','magTail'].forEach(id=>$(id).addEventListener('change',()=>{drawRuler();if(DA.which){const w=DA.which,btn=$({srM:'dSrM',srS:'dSrS',bdM:'dBdM',bdF:'dBdF'}[w]);dStop();dPlay(w,btn);}}));
+$('pA').addEventListener('click',dStop,true);$('pB').addEventListener('click',dStop,true);
+
+function panelsLoop(now){drawSR(now);drawWheel();requestAnimationFrame(panelsLoop);}
 requestAnimationFrame(panelsLoop);
 
 async function init(){srcBytes=W*H*3;$('cA').getContext('2d').drawImage(SRC,0,0);$('stA').textContent=fmtB(srcBytes)+' · uncompressed (like WAV)';await pick(cur);}
